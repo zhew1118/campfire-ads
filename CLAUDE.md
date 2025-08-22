@@ -43,29 +43,92 @@ The stack.md file contains the full microservices architecture specification, se
 - ✅ **Docker Production**: Full containerization with working builds
 - ✅ **Remote Deployment**: Ready for production deployment
 
-## 🚀 **Next Priority: Phase 2B - RTB Engine + Service Extraction** 🔄
+## 🚀 **Next Priority: Phase 2A.5 - Inventory Service Foundation** 🔄
 
-**NEXT** (Phase 2B) - Build high-performance RTB engine and extract services:
+**NEXT** (Phase 2A.5) - Build inventory management before RTB engine:
+
+### **Why Phase 2A.5 First?**
+- ✅ **Natural progression**: API Gateway → Real inventory → RTB bidding
+- ✅ **Immediate user value**: Podcasters add content, advertisers browse
+- ✅ **Data foundation**: Real inventory for RTB engine to bid on
+- ✅ **Familiar stack**: Node.js + PostgreSQL (no new languages yet)
+- ✅ **Dashboard integration**: Extends existing React frontend
 
 ### **Implementation Plan:**
 
-1. **RTB Engine Development (Go + gRPC)**
-   - High-performance bidding engine in Go
-   - gRPC API for sub-10ms response times
-   - Integration with existing API Gateway
-   - Prebid.js compatibility layer
+1. **Inventory Service (Node.js + PostgreSQL)**
+   - CRUD operations for podcasts, episodes, ad slots
+   - CPM floor pricing management
+   - Pre/mid/post-roll slot configuration  
+   - Inventory metadata storage
 
-2. **Service Extraction**
-   - Extract inventory service from API Gateway
-   - Extract analytics service with real-time processing
-   - Extract audio service with FFmpeg integration
-   - Maintain API Gateway as orchestration layer
+2. **Database Design**
+   ```sql
+   podcasts (id, name, category, rss_url, owner_id, created_at)
+   episodes (id, podcast_id, title, duration, audio_url, status)
+   ad_slots (id, episode_id, position, duration, cpm_floor, available)
+   campaigns (id, advertiser_id, name, budget, status, targeting)
+   ```
 
-3. **Performance Optimization**
-   - gRPC communication for critical paths
-   - Redis caching for frequently accessed data
-   - Database optimization for RTB workloads
-   - Load testing and performance tuning
+3. **Dashboard Features**
+   - **Podcaster Dashboard**: Add podcasts, upload episodes, set CPM pricing
+   - **Advertiser Dashboard**: Browse inventory, view available slots  
+   - **Basic Analytics**: Inventory stats, campaign performance
+   - **Admin Panel**: User management, platform overview
+
+4. **API Endpoints**
+   ```
+   POST /api/podcasts                    # Create podcast
+   GET  /api/podcasts                    # List podcasts
+   POST /api/podcasts/{id}/episodes      # Add episode  
+   GET  /api/episodes/{id}/slots         # View ad slots
+   PUT  /api/slots/{id}/pricing          # Set CPM floors
+   GET  /api/inventory/available         # Browse inventory
+   POST /api/campaigns                   # Create campaign
+   ```
+
+### **Phase 2A.5 Implementation Tasks** 📋
+```
+□ 1. Database Setup
+  □ Set up PostgreSQL database with Docker
+  □ Create database schema (podcasters, podcasts, episodes, ad_slots, campaigns)
+  □ Add database migrations system
+  □ Set up connection pooling
+
+□ 2. Inventory Service Development  
+  □ Create new service directory: services/inventory-service/
+  □ Set up Express.js + TypeScript + PostgreSQL stack
+  □ Implement podcast CRUD operations
+  □ Implement episode management
+  □ Implement ad slot management with CPM pricing
+  □ Add input validation with Joi schemas
+  □ Add authentication middleware integration
+
+□ 3. Dashboard Integration
+  □ Create Podcaster dashboard pages (PodcastList, AddPodcast, EpisodeManager)
+  □ Create Advertiser dashboard pages (InventoryBrowser, CampaignManager)  
+  □ Add forms for podcast/episode creation
+  □ Add inventory browsing interface
+  □ Add campaign creation interface
+
+□ 4. API Gateway Integration
+  □ Update API Gateway routes to proxy to inventory service
+  □ Add service discovery for inventory service
+  □ Update authentication to work with new endpoints
+  □ Add rate limiting for inventory endpoints
+
+□ 5. Testing & Documentation
+  □ Add unit tests for inventory service
+  □ Add integration tests for API Gateway ↔ inventory service
+  □ Update API documentation
+  □ Add sample data seeding scripts
+```
+
+### **Phase 2B: RTB Engine (Postponed)** 📅
+- **RTB Engine**: High-performance Go + gRPC bidding system  
+- **Service Extraction**: Microservices for analytics, audio processing
+- **Performance**: Sub-10ms RTB responses, 10k+ req/s capability
+- **Rationale**: Build inventory foundation first for better RTB integration
 
 ### **Phase 2A Completed Successfully:**
 - ✅ **Dashboard**: React app running at `http://localhost:3001`
