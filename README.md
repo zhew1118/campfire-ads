@@ -143,66 +143,23 @@ chmod +x scripts/setup.sh
 
 ## 📊 Database
 
-### Connection Details
-- **Host**: localhost:5432
-- **Database**: campfire_ads
-- **User**: campfire_user
-- **Password**: campfire_password
+The project uses PostgreSQL for data storage with automated migrations and seeding for development.
 
-### Sample Data
-The database is automatically seeded with sample users, podcasts, and campaigns for development.
+### Development Setup
+Database connection details are configured through environment variables. Copy `.env.example` to `.env` and update the database settings for your local development environment.
 
-**Sample Accounts**:
-- Publisher: `publisher@example.com` / `demo123`
-- Advertiser: `advertiser@example.com` / `demo123`
+## 🔌 API Documentation
 
-## 🔌 API Endpoints
+The platform provides RESTful APIs for:
 
-### Authentication
-```
-POST /api/auth/register    # User registration
-POST /api/auth/login       # User login
-POST /api/auth/refresh     # Token refresh
-POST /api/auth/logout      # User logout
-```
+- **Authentication**: User registration, login, and session management
+- **Publisher Management**: Podcast and episode management
+- **Campaign Management**: Ad campaign creation and control  
+- **Analytics**: Performance tracking and reporting
+- **RTB Integration**: Real-time bidding endpoints
+- **Audio Processing**: Dynamic ad insertion services
 
-### Publishers
-```
-GET    /api/podcasts           # List user's podcasts
-POST   /api/podcasts           # Add new podcast
-GET    /api/podcasts/:id       # Get podcast details
-PUT    /api/podcasts/:id       # Update podcast
-DELETE /api/podcasts/:id       # Remove podcast
-GET    /api/podcasts/:id/episodes    # List episodes
-POST   /api/podcasts/:id/sync        # Sync RSS feed
-GET    /api/podcasts/:id/analytics   # Revenue analytics
-```
-
-### Advertisers
-```
-GET    /api/campaigns          # List campaigns
-POST   /api/campaigns          # Create campaign
-GET    /api/campaigns/:id      # Get campaign details
-PUT    /api/campaigns/:id      # Update campaign
-DELETE /api/campaigns/:id      # Delete campaign
-GET    /api/campaigns/:id/performance  # Campaign analytics
-POST   /api/campaigns/:id/pause        # Pause/resume campaign
-```
-
-### RTB Integration
-```
-POST   /api/rtb/bid           # Receive bid requests
-POST   /api/rtb/win           # Win notifications
-POST   /api/rtb/impression    # Impression tracking
-POST   /api/rtb/click         # Click tracking
-```
-
-### Audio Processing
-```
-POST   /api/audio/process     # Process episode with ads
-GET    /api/audio/status/:id  # Check processing status
-GET    /api/audio/download/:id # Download processed episode
-```
+Detailed API documentation is available after starting the development server at `http://localhost:3001/api/docs`.
 
 ## 🧪 Development
 
@@ -252,29 +209,17 @@ docker-compose down
 
 ## 📈 Roadmap
 
-### Week 1: Foundation ✅
-- [x] Project structure and dependencies
-- [x] Database schema and migrations
-- [x] Basic authentication system
-- [x] React dashboard shell
+### Current Status
+- ✅ **Foundation**: Project structure, database schema, authentication
+- ✅ **Core Setup**: React dashboard, API routes, Docker environment
 
-### Week 2: Publisher Features
-- [ ] Podcast registration and RSS parsing
-- [ ] Episode discovery and inventory creation
-- [ ] Enhanced publisher dashboard
-- [ ] Audio file management
+### Upcoming Features
+- **Publisher Tools**: RSS feed integration, episode management
+- **Advertiser Platform**: Campaign creation and management tools  
+- **RTB System**: Real-time bidding and auction system
+- **Audio Processing**: Dynamic ad insertion capabilities
 
-### Week 3: Advertiser Features
-- [ ] Campaign creation and management
-- [ ] Targeting options and bidding
-- [ ] Advertiser dashboard
-- [ ] Basic reporting
-
-### Week 4: RTB Integration
-- [ ] Prebid Server configuration
-- [ ] Bid request/response handling
-- [ ] Audio processing with FFmpeg
-- [ ] End-to-end auction testing
+See our [Issues](../../issues) and [Projects](../../projects) for detailed development tracking.
 
 ## 🤝 Contributing
 
@@ -298,8 +243,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [Prebid.js](https://prebid.org/) for RTB integration
 - UI components inspired by [Tailwind UI](https://tailwindui.com/)
-- Architecture follows industry best practices for ad tech platforms
+- Thanks to the open-source community for the amazing tools and libraries
 
 ---
 
-**Ready to revolutionize podcast advertising?** 🎙️✨
+**Open-source podcast advertising platform** 🎙️
