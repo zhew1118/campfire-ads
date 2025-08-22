@@ -195,3 +195,12 @@ docs/generated/
 
 # API documentation artifacts
 docs/api/generated/
+
+# Internal architecture documents (sensitive)
+stack.md
+architecture.md
+internal/
+strategy/
+*.internal.md
+planning/
+business/
