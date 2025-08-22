@@ -1,0 +1,46 @@
+host: 0.0.0.0
+port: 8000
+admin_port: 6060
+default_timeout_ms: 1000
+max_timeout_ms: 3000
+timeout_notification:
+  sampling_rate: 0.01
+  fail_fast: true
+
+adapters:
+  appnexus:
+    disabled: false
+    endpoint: "http://ib.adnxs.com/openrtb2"
+  pubmatic:
+    disabled: false
+    endpoint: "https://hbopenbid.pubmatic.com/translator?source=prebid-server"
+
+stored_requests:
+  filesystem:
+    enabled: true
+    path: "/app/configs/stored_requests"
+
+stored_video_req:
+  filesystem:
+    enabled: true
+    path: "/app/configs/stored_video_requests"
+
+accounts:
+  filesystem:
+    enabled: true
+    path: "/app/configs/accounts"
+
+logging:
+  level: "info"
+  console:
+    enabled: true
+
+metrics:
+  influxdb:
+    disabled: true
+
+privacy:
+  gdpr:
+    enabled: false
+  ccpa:
+    enabled: false

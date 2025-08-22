@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: campfire-postgres
+    environment:
+      POSTGRES_DB: campfire_ads
+      POSTGRES_USER: campfire_user
+      POSTGRES_PASSWORD: campfire_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campfire_user -d campfire_ads"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: campfire-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prebid-server:
+    image: prebid/prebid-server:latest
+    container_name: campfire-prebid
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./prebid-server/configs:/app/configs
+    environment:
+      - PBS_CONFIG_FILE=/app/configs/pbs.yaml
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  prebid-server:
+    image: prebid/prebid-server:latest
+    container_name: campfire-prebid-standalone
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./configs:/app/configs
+    environment:
+      - PBS_CONFIG_FILE=/app/configs/pbs.yaml
+    command: ["/usr/local/bin/prebid-server", "--logtostderr"]

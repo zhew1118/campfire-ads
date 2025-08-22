@@ -1,0 +1,56 @@
+{
+  "name": "campfire-ads-backend",
+  "version": "1.0.0",
+  "description": "Campfire Ads Backend API Server",
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "start": "node dist/app.js",
+    "test": "jest",
+    "migrate": "knex migrate:latest",
+    "seed": "knex seed:run",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "knex": "^3.0.1",
+    "redis": "^4.6.10",
+    "fluent-ffmpeg": "^2.1.2",
+    "axios": "^1.6.0",
+    "joi": "^17.11.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/morgan": "^1.9.9",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/pg": "^8.10.7",
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/multer": "^1.4.11",
+    "@types/uuid": "^9.0.7",
+    "@types/node": "^20.8.10",
+    "@types/jest": "^29.5.8",
+    "typescript": "^5.2.2",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.53.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
