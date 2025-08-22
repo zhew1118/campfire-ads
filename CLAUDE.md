@@ -2,6 +2,11 @@
 
 This file contains project context and commonly used commands for the Campfire Ads podcast advertising platform.
 
+## 📋 Quick Architecture Reference
+
+**⚡ For complete architecture details, see: [`stack.md`](./stack.md)**  
+The stack.md file contains the full microservices architecture specification, service communication patterns, performance targets, and migration roadmap.
+
 ## 🎯 Project Overview
 
 Campfire Ads is a modern podcast advertising platform built with microservices architecture. The platform connects podcasters with advertisers through real-time bidding (RTB) technology.
@@ -25,20 +30,19 @@ campfire-ads/
 ├── common/               # ✅ Enterprise Security Middleware
 │   ├── middleware/        # JWT, rate limiting, validation, logging
 │   └── config/            # Environment-specific security configs
-├── backend/              # Legacy monolithic backend (to be extracted)
-├── frontend/             # React dashboard (unchanged)
+├── dashboard/            # React management interface
 └── docker-compose.yml
 ```
 
-### 🔄 Phase 2: RTB Engine (NEXT)
-- Extract Go RTB engine for <10ms bid responses
-- Implement gRPC communication
-- Add service discovery
+### 🔄 Phase 2: RTB Engine + Service Extraction (NEXT)
+- Extract inventory service from legacy backend (removed)
+- Implement Go RTB engine for <10ms bid responses
+- Add gRPC communication and service discovery
 
-### 🔄 Phase 3: Complete Microservices
-- Extract all remaining services from backend
-- Full microservices deployment
-- Production-ready orchestration
+### 🔄 Phase 3: Complete Microservices (FUTURE)
+- Extract analytics, audio, and RSS services
+- Full microservices deployment with orchestration
+- Production-ready service mesh
 
 ## 🛠️ Common Commands
 
@@ -163,9 +167,9 @@ npm run build               # Build TypeScript
 npm start                   # Production server
 ```
 
-### Frontend Development
+### Dashboard Development
 ```bash
-cd frontend  
+cd dashboard  
 npm run dev                 # Development server (Vite)
 npm run build               # Production build
 npm run preview             # Preview production build
@@ -315,10 +319,14 @@ cd backend && npm test
 
 ## 📁 Key Files to Know
 
-- `stack.md` - Complete architecture specification
-- `api-gateway/src/app.ts` - Main API Gateway application  
-- `api-gateway/src/routes/` - All route handlers
+- **`stack.md`** - 📋 **COMPLETE ARCHITECTURE SPECIFICATION** (read this first!)
+- `api-gateway/src/app-secure.ts` - 🛡️ Production API Gateway with enterprise security
+- `api-gateway/src/app.ts` - Basic API Gateway version  
+- `api-gateway/src/routes/` - All route handlers for 8 service groups
+- `common/middleware/` - 🛡️ Enterprise security middleware library
+- `common/config/security.ts` - Environment-specific security configurations
 - `common/types/index.ts` - Shared TypeScript interfaces
+- `dashboard/` - React management interface
 - `docker-compose.api-gateway.yml` - API Gateway Docker setup
 
 ---
