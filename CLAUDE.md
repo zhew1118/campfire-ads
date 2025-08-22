@@ -41,21 +41,45 @@ The stack.md file contains the full microservices architecture specification, se
 
 **IMMEDIATE** (1-2 hours) - Connect dashboard to secure API Gateway:
 
-1. **Update Dashboard API Client** 
+### **Implementation Steps:**
+
+1. **Examine Current Dashboard Configuration**
+   - Check `dashboard/src/services/` for API client files
+   - Look for current base URL configuration (likely pointing to legacy backend)
+   - Identify authentication service implementation
+
+2. **Update Dashboard API Client** 
    - Change base URL from legacy backend to API Gateway (`http://localhost:3000`)
    - Update authentication endpoints and token handling
-   - Test all dashboard API calls through gateway
+   - Ensure API paths match API Gateway routes (`/api/*`)
 
-2. **End-to-End Testing**
-   - Dashboard login → API Gateway JWT flow
+3. **Test Authentication Flow**
+   - Dashboard login → API Gateway JWT endpoint
+   - Token storage and header handling
+   - Route protection and authentication checks
+
+4. **End-to-End Testing**
    - Dashboard pages → API Gateway routes → mock responses  
    - Verify security features work with real UI
+   - Test all major dashboard functions
 
-3. **Benefits of Connecting Now**
-   - ✅ Full security testing with real UI interactions
-   - ✅ Immediate feedback on API Gateway performance
-   - ✅ Ready foundation for when microservices are added
-   - ✅ Complete authentication/authorization validation
+### **Key Files to Check:**
+- `dashboard/package.json` - Dependencies and scripts
+- `dashboard/src/services/api.ts` or similar - API client configuration  
+- `dashboard/.env` or similar - Environment configuration
+- API Gateway routes in `api-gateway/src/routes/` - Ensure compatibility
+
+### **Current API Gateway Status:**
+- ✅ **Running**: `http://localhost:3000` with all routes implemented
+- ✅ **Authentication**: JWT middleware working (`common/middleware/auth.ts`)
+- ✅ **Security**: All enterprise middleware active
+- ✅ **Routes**: All 8 service groups implemented with mock responses
+
+### **Expected Outcome:**
+- Dashboard successfully authenticates through API Gateway
+- All dashboard pages load with API Gateway data
+- Security features (JWT, rate limiting) validated with real UI
+- Complete end-to-end platform working
 
 ## 🛠️ Common Commands
 
