@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: 
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - JWT_SECRET=development-jwt-secret-key
+      - API_KEY=development-api-key
+      - INVENTORY_SERVICE_URL=http://mock-services:3001
+      - ANALYTICS_SERVICE_URL=http://mock-services:3002
+      - AUDIO_SERVICE_URL=http://mock-services:8081
+      - RSS_SERVICE_URL=http://mock-services:3003
+      - RTB_ENGINE_URL=http://mock-services:8080
+    depends_on:
+      - mock-services
+    networks:
+      - campfire-network
+
+  # Mock services for testing API Gateway routing
+  mock-services:
+    image: node:18-alpine
+    command: |
+      sh -c "
+        npm install -g json-server &&
+        echo '{
+          \"podcasters\": [{\"id\": 1, \"name\": \"Test Podcaster\", \"email\": \"test@example.com\"}],
+          \"advertisers\": [{\"id\": 1, \"name\": \"Test Advertiser\", \"company_name\": \"Test Corp\"}],
+          \"campaigns\": [{\"id\": 1, \"name\": \"Test Campaign\", \"status\": \"active\"}],
+          \"inventory\": [{\"id\": 1, \"episode_id\": \"ep1\", \"status\": \"available\"}]
+        }' > db.json &&
+        json-server --host 0.0.0.0 --port 3001 db.json &
+        json-server --host 0.0.0.0 --port 3002 db.json &
+        json-server --host 0.0.0.0 --port 3003 db.json &
+        json-server --host 0.0.0.0 --port 8080 db.json &
+        json-server --host 0.0.0.0 --port 8081 db.json &
+        tail -f /dev/null
+      "
+    networks:
+      - campfire-network
+
+networks:
+  campfire-network:
+    driver: bridge
