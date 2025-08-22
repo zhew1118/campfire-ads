@@ -1,0 +1,261 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.commonLimits = exports.createRateLimiter = exports.RateLimiter = void 0;
+const redis_1 = require("redis");
+class RateLimiter {
+    config;
+    redis;
+    isRedisConnected = false;
+    constructor(config) {
+        this.config = {
+            windowMs: config.windowMs,
+            maxRequests: config.maxRequests,
+            message: config.message || 'Too many requests, please try again later',
+            statusCode: config.statusCode || 429,
+            skipSuccessfulRequests: config.skipSuccessfulRequests || false,
+            skipFailedRequests: config.skipFailedRequests || false,
+            keyGenerator: config.keyGenerator || this.defaultKeyGenerator,
+            redisUrl: config.redisUrl || 'redis://localhost:6379',
+            redisClient: config.redisClient
+        };
+        this.redis = this.config.redisClient || (0, redis_1.createClient)({
+            url: this.config.redisUrl,
+            socket: {
+                reconnectStrategy: (retries) => Math.min(retries * 50, 1000)
+            }
+        });
+        this.initializeRedis();
+    }
+    async initializeRedis() {
+        if (!this.config.redisClient) {
+            try {
+                await this.redis.connect();
+                this.isRedisConnected = true;
+                console.log('Rate limiter connected to Redis');
+            }
+            catch (error) {
+                console.error('Rate limiter failed to connect to Redis:', error);
+                this.isRedisConnected = false;
+            }
+        }
+        else {
+            this.isRedisConnected = true;
+        }
+    }
+    defaultKeyGenerator(req) {
+        return `rate_limit:${req.ip}:${req.path}`;
+    }
+    /**
+     * Standard rate limiting middleware
+     */
+    middleware = () => {
+        return async (req, res, next) => {
+            try {
+                const key = this.config.keyGenerator(req);
+                const result = await this.checkLimit(key);
+                // Add rate limit headers
+                res.set({
+                    'X-RateLimit-Limit': result.limit.toString(),
+                    'X-RateLimit-Remaining': Math.max(0, result.remaining).toString(),
+                    'X-RateLimit-Reset': new Date(result.resetTime).toISOString()
+                });
+                if (result.current > result.limit) {
+                    return res.status(this.config.statusCode).json({
+                        error: this.config.message,
+                        code: 'RATE_LIMIT_EXCEEDED',
+                        rateLimit: {
+                            limit: result.limit,
+                            current: result.current,
+                            remaining: 0,
+                            resetTime: result.resetTime
+                        }
+                    });
+                }
+                // Track the request result for conditional counting
+                const originalEnd = res.end;
+                res.end = (...args) => {
+                    const shouldSkip = (this.config.skipSuccessfulRequests && res.statusCode < 400) ||
+                        (this.config.skipFailedRequests && res.statusCode >= 400);
+                    if (!shouldSkip) {
+                        // Count this request asynchronously
+                        this.incrementCounter(key).catch(console.error);
+                    }
+                    originalEnd.apply(res, args);
+                };
+                next();
+            }
+            catch (error) {
+                console.error('Rate limiting error:', error);
+                // Continue without rate limiting if Redis fails
+                next();
+            }
+        };
+    };
+    /**
+     * RTB-specific ultra-fast rate limiting (for <10ms requirements)
+     */
+    rtbMiddleware = (maxRequestsPerSecond = 10000) => {
+        const windowMs = 1000; // 1 second window
+        return async (req, res, next) => {
+            try {
+                const key = `rtb_limit:${req.ip}:${Math.floor(Date.now() / windowMs)}`;
+                const current = await this.getQuickCount(key);
+                if (current >= maxRequestsPerSecond) {
+                    return res.status(429).json({
+                        error: 'RTB rate limit exceeded',
+                        code: 'RTB_RATE_LIMIT_EXCEEDED'
+                    });
+                }
+                // Increment counter immediately for RTB speed
+                await this.quickIncrement(key, windowMs / 1000);
+                next();
+            }
+            catch (error) {
+                console.error('RTB rate limiting error:', error);
+                next(); // Continue without rate limiting if Redis fails
+            }
+        };
+    };
+    /**
+     * Advanced rate limiting with different limits per endpoint
+     */
+    advancedMiddleware = (limits) => {
+        return async (req, res, next) => {
+            try {
+                const endpoint = this.getEndpointKey(req);
+                const config = limits[endpoint] || limits['default'];
+                if (!config) {
+                    return next();
+                }
+                const key = `advanced_limit:${req.ip}:${endpoint}`;
+                const result = await this.checkLimit(key, config.windowMs, config.maxRequests);
+                res.set({
+                    'X-RateLimit-Limit': result.limit.toString(),
+                    'X-RateLimit-Remaining': Math.max(0, result.remaining).toString(),
+                    'X-RateLimit-Reset': new Date(result.resetTime).toISOString()
+                });
+                if (result.current > result.limit) {
+                    return res.status(config.statusCode || 429).json({
+                        error: config.message || this.config.message,
+                        code: 'ENDPOINT_RATE_LIMIT_EXCEEDED',
+                        endpoint
+                    });
+                }
+                await this.incrementCounter(key, config.windowMs / 1000);
+                next();
+            }
+            catch (error) {
+                console.error('Advanced rate limiting error:', error);
+                next();
+            }
+        };
+    };
+    async checkLimit(key, windowMs, maxRequests) {
+        if (!this.isRedisConnected) {
+            throw new Error('Redis not connected');
+        }
+        const window = windowMs || this.config.windowMs;
+        const limit = maxRequests || this.config.maxRequests;
+        const now = Date.now();
+        const windowStart = now - window;
+        // Remove expired entries and count current requests
+        await this.redis.zRemRangeByScore(key, 0, windowStart);
+        const current = await this.redis.zCard(key);
+        return {
+            limit,
+            current,
+            remaining: limit - current,
+            resetTime: now + window
+        };
+    }
+    async incrementCounter(key, expireSeconds) {
+        if (!this.isRedisConnected)
+            return;
+        const now = Date.now();
+        const expire = expireSeconds || (this.config.windowMs / 1000);
+        await this.redis.multi()
+            .zadd(key, now, `${now}-${Math.random()}`)
+            .expire(key, expire)
+            .exec();
+    }
+    async getQuickCount(key) {
+        if (!this.isRedisConnected)
+            return 0;
+        const count = await this.redis.incr(key);
+        if (count === 1) {
+            await this.redis.expire(key, 1); // 1 second expiry
+        }
+        return count;
+    }
+    async quickIncrement(key, expireSeconds) {
+        if (!this.isRedisConnected)
+            return;
+        await this.redis.multi()
+            .incr(key)
+            .expire(key, expireSeconds)
+            .exec();
+    }
+    getEndpointKey(req) {
+        // Create a normalized endpoint key
+        const path = req.route?.path || req.path;
+        const method = req.method.toLowerCase();
+        return `${method}:${path}`;
+    }
+    /**
+     * Get current rate limit status for a key
+     */
+    async getStatus(req) {
+        const key = this.config.keyGenerator(req);
+        return await this.checkLimit(key);
+    }
+    /**
+     * Reset rate limit for a specific key
+     */
+    async reset(req) {
+        const key = this.config.keyGenerator(req);
+        if (this.isRedisConnected) {
+            await this.redis.del(key);
+        }
+    }
+    /**
+     * Close Redis connection
+     */
+    async close() {
+        if (this.isRedisConnected && !this.config.redisClient) {
+            await this.redis.disconnect();
+            this.isRedisConnected = false;
+        }
+    }
+}
+exports.RateLimiter = RateLimiter;
+// Export factory function for creating rate limiters
+const createRateLimiter = (config) => new RateLimiter(config);
+exports.createRateLimiter = createRateLimiter;
+// Export commonly used rate limiting configurations
+exports.commonLimits = {
+    // API Gateway general limit
+    api: {
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        maxRequests: 1000,
+        message: 'Too many requests from this IP'
+    },
+    // RTB bidding (ultra-strict)
+    rtb: {
+        windowMs: 1000, // 1 second
+        maxRequests: 100,
+        message: 'RTB rate limit exceeded'
+    },
+    // Authentication endpoints
+    auth: {
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        maxRequests: 10,
+        message: 'Too many authentication attempts'
+    },
+    // File upload endpoints
+    upload: {
+        windowMs: 60 * 1000, // 1 minute
+        maxRequests: 5,
+        message: 'Too many upload attempts'
+    }
+};
+//# sourceMappingURL=rateLimiting.js.map
