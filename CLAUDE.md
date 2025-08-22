@@ -7,6 +7,25 @@ This file contains project context and commonly used commands for the Campfire A
 **⚡ For complete architecture details, see: [`stack.md`](./stack.md)**  
 The stack.md file contains the full microservices architecture specification, service communication patterns, performance targets, and migration roadmap.
 
+## 🚨 **CRITICAL DEVELOPMENT RULE**
+
+**🔍 BEFORE WRITING ANY CODE - ALWAYS CHECK `common/` FOLDER FIRST!**
+
+1. **Check for existing utilities**: `common/middleware/`, `common/config/`, `common/types/`
+2. **Reuse shared components**: Authentication, validation, security, database connections
+3. **Follow established patterns**: TypeScript interfaces, error handling, logging
+4. **Extend existing code**: Don't duplicate functionality that already exists
+5. **Check imports**: See what other services are already using from common/
+
+**The `common/` folder contains:**
+- 🛡️ **Security middleware** - Authentication, rate limiting, validation  
+- ⚙️ **Configuration utilities** - Environment-specific settings
+- 🔧 **Shared types** - TypeScript interfaces and schemas
+- 📊 **Database utilities** - Connection pooling, migrations (when added)
+- 🚨 **Error handling** - Standardized error responses
+
+**This prevents code duplication and ensures consistent architecture across all services.**
+
 ## 🔄 **DOCUMENTATION UPDATE RULE**
 
 **🚨 CRITICAL: When completing any major phase or milestone:**
