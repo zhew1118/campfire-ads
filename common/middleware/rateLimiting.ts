@@ -98,18 +98,19 @@ export class RateLimiter {
 
         // Track the request result for conditional counting
         const originalEnd = res.end;
-        res.end = (...args: any[]) => {
+        const self = this;
+        res.end = function(this: any, ...args: any[]) {
           const shouldSkip = 
-            (this.config.skipSuccessfulRequests && res.statusCode < 400) ||
-            (this.config.skipFailedRequests && res.statusCode >= 400);
+            (self.config.skipSuccessfulRequests && res.statusCode < 400) ||
+            (self.config.skipFailedRequests && res.statusCode >= 400);
 
           if (!shouldSkip) {
             // Count this request asynchronously
-            this.incrementCounter(key).catch(console.error);
+            self.incrementCounter(key).catch(console.error);
           }
 
-          originalEnd.apply(res, args);
-        };
+          return (originalEnd as any).apply(this, args);
+        } as any;
 
         next();
       } catch (error) {
@@ -216,7 +217,7 @@ export class RateLimiter {
     const expire = expireSeconds || (this.config.windowMs / 1000);
 
     await this.redis.multi()
-      .zadd(key, now, `${now}-${Math.random()}`)
+      .zAdd(key, {score: now, value: `${now}-${Math.random()}`})
       .expire(key, expire)
       .exec();
   }

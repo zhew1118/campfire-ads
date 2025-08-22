@@ -3,8 +3,8 @@ FROM node:18-alpine
 WORKDIR /app
 
 # First, copy and build common middleware
-COPY common ./common
-WORKDIR /app/common
+COPY common/middleware ./common/middleware
+WORKDIR /app/common/middleware
 RUN npm ci && npm run build
 
 # Then build API Gateway

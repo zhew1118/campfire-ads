@@ -177,11 +177,17 @@ export class AuthMiddleware {
    * Generate JWT token
    */
   generateToken(payload: object): string {
-    return jwt.sign(payload, this.jwtConfig.secret, {
-      expiresIn: this.jwtConfig.expiresIn,
-      issuer: this.jwtConfig.issuer,
-      audience: this.jwtConfig.audience
-    });
+    if (!this.jwtConfig.secret) {
+      throw new Error('JWT secret is required');
+    }
+    
+    const options: any = {
+      expiresIn: this.jwtConfig.expiresIn || '24h',
+      issuer: this.jwtConfig.issuer || 'campfire-ads',
+      audience: this.jwtConfig.audience || 'campfire-ads-api'
+    };
+    
+    return jwt.sign(payload, this.jwtConfig.secret, options);
   }
 
   /**

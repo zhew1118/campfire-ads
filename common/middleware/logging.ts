@@ -162,24 +162,26 @@ export class SecurityLogger {
         method: req.method,
         url: req.originalUrl || req.url,
         timestamp: new Date().toISOString()
-      };
+      } as any;
 
       // Log request
       this.logRequest(req, logContext);
 
-      // Capture original end function
+      // Capture original end function and logger context
       const originalEnd = res.end;
+      const self = this;
       
       // Override response end to log response
-      res.end = (...args: any[]) => {
+      res.end = function(this: any, ...args: any[]) {
         logContext.duration = Date.now() - startTime;
         logContext.statusCode = res.statusCode;
         
-        this.logResponse(req, res, logContext);
+        // Log the response
+        self.logResponse(req, res, logContext);
         
         // Call original end function
-        originalEnd.apply(res, args);
-      };
+        return (originalEnd as any).apply(this, args);
+      } as any;
 
       next();
     };
@@ -192,30 +194,31 @@ export class SecurityLogger {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       // Override original end to detect security events
       const originalEnd = res.end;
+      const self = this;
       
-      res.end = (...args: any[]) => {
+      res.end = function(this: any, ...args: any[]) {
         // Log security events based on status codes
         if (res.statusCode === 401) {
-          this.logSecurityEvent('AUTHENTICATION_FAILURE', req, {
+          self.logSecurityEvent('AUTHENTICATION_FAILURE', req, {
             reason: 'Invalid or missing credentials',
             statusCode: res.statusCode
           });
         } else if (res.statusCode === 403) {
-          this.logSecurityEvent('AUTHORIZATION_FAILURE', req, {
+          self.logSecurityEvent('AUTHORIZATION_FAILURE', req, {
             reason: 'Insufficient permissions',
             statusCode: res.statusCode,
             userId: req.user?.id,
             userRole: req.user?.role
           });
         } else if (res.statusCode === 429) {
-          this.logSecurityEvent('RATE_LIMIT_EXCEEDED', req, {
+          self.logSecurityEvent('RATE_LIMIT_EXCEEDED', req, {
             reason: 'Too many requests',
             statusCode: res.statusCode
           });
         }
 
-        originalEnd.apply(res, args);
-      };
+        return (originalEnd as any).apply(this, args);
+      } as any;
 
       next();
     };
@@ -232,18 +235,19 @@ export class SecurityLogger {
 
       const startTime = process.hrtime.bigint();
       const originalEnd = res.end;
+      const self = this;
 
-      res.end = (...args: any[]) => {
+      res.end = function(this: any, ...args: any[]) {
         const endTime = process.hrtime.bigint();
         const duration = Number(endTime - startTime) / 1000000; // Convert to milliseconds
 
-        this.logger.info('RTB Performance', {
+        self.logger.info('RTB Performance', {
           type: 'RTB_PERFORMANCE',
           method: req.method,
           path: req.path,
           statusCode: res.statusCode,
           duration: `${duration.toFixed(2)}ms`,
-          ip: this.getClientIP(req),
+          ip: self.getClientIP(req),
           timestamp: new Date().toISOString(),
           isSlowRequest: duration > 10, // Flag requests over 10ms
           requestSize: req.get('content-length') || 0,
@@ -252,15 +256,15 @@ export class SecurityLogger {
 
         // Alert on slow RTB requests
         if (duration > 10) {
-          this.logSecurityEvent('RTB_SLOW_RESPONSE', req, {
+          self.logSecurityEvent('RTB_SLOW_RESPONSE', req, {
             duration: `${duration.toFixed(2)}ms`,
             threshold: '10ms',
             statusCode: res.statusCode
           });
         }
 
-        originalEnd.apply(res, args);
-      };
+        return (originalEnd as any).apply(this, args);
+      } as any;
 
       next();
     };
