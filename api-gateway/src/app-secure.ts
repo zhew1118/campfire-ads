@@ -16,6 +16,7 @@ import {
 
 import { errorHandler } from './middleware/errorHandler';
 
+import authRouter from './routes/auth';
 import podcastersRouter from './routes/podcasters';
 import advertisersRouter from './routes/advertisers';
 import campaignsRouter from './routes/campaigns';
@@ -108,6 +109,9 @@ app.get('/health', (req, res) => {
     }
   });
 });
+
+// Authentication routes (public endpoints for login)
+app.use('/api/auth', authRouter);
 
 // API routes with appropriate middleware
 app.use('/api/podcasters', 

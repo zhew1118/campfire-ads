@@ -1,6 +1,9 @@
 import { PlusIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { apiService } from '../services/api';
 
 const Podcasts: React.FC = () => {
+  const [apiStatus, setApiStatus] = useState<string>('Testing API connection...');
   const podcasts = [
     {
       id: '1',
@@ -20,12 +23,31 @@ const Podcasts: React.FC = () => {
     }
   ];
 
+  // Test API connection when component loads
+  useEffect(() => {
+    const testApi = async () => {
+      try {
+        await apiService.getPodcasters();
+        setApiStatus('✅ API Gateway connection successful!');
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setApiStatus('❌ Authentication required - please login');
+        } else {
+          setApiStatus(`⚠️ API Gateway connected, service unavailable: ${error.response?.data?.error || error.message}`);
+        }
+      }
+    };
+    
+    testApi();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Podcasts</h1>
           <p className="text-gray-600">Manage your podcast inventory and ad slots</p>
+          <p className="text-sm mt-2">{apiStatus}</p>
         </div>
         <button className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700">
           <PlusIcon className="w-5 h-5 mr-2" />

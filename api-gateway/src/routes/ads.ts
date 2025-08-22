@@ -1,11 +1,11 @@
 import { Router, Response, Request } from 'express';
 import { HTTPClient } from '../services/httpClient';
-import { validateAPIKey } from '../middleware/auth';
+import { AuthenticatedRequest } from '../../../common/middleware';
 
 const router = Router();
 const rtbService = new HTTPClient('rtb');
 
-router.post('/bid', validateAPIKey, async (req: Request, res: Response) => {
+router.post('/bid', async (req: Request, res: Response) => {
   try {
     const startTime = Date.now();
     
@@ -31,7 +31,7 @@ router.post('/bid', validateAPIKey, async (req: Request, res: Response) => {
   }
 });
 
-router.post('/win', validateAPIKey, async (req: Request, res: Response) => {
+router.post('/win', async (req: Request, res: Response) => {
   try {
     const response = await rtbService.post('/win', req.body);
     

@@ -1,13 +1,28 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { 
   HomeIcon, 
   MicrophoneIcon, 
   SpeakerWaveIcon,
-  ChartBarIcon 
+  ChartBarIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 const Layout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    } else {
+      // No user data, redirect to login
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
@@ -15,6 +30,44 @@ const Layout: React.FC = () => {
     { name: 'Campaigns', href: '/campaigns', icon: SpeakerWaveIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   ];
+
+  const handleLogout = () => {
+    // Clear authentication data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // Redirect to login
+    navigate('/login');
+  };
+
+  const getUserInitials = (user: any) => {
+    if (!user?.email) return 'U';
+    return user.email.charAt(0).toUpperCase();
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'podcaster':
+        return 'Podcaster';
+      case 'advertiser':
+        return 'Advertiser';
+      case 'admin':
+        return 'Admin';
+      default:
+        return 'User';
+    }
+  };
+
+  // Show loading while checking authentication
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -44,16 +97,31 @@ const Layout: React.FC = () => {
         </nav>
         
         <div className="px-4 py-4 border-t">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">U</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {getUserInitials(user)}
+                  </span>
+                </div>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-700">
+                  {user?.email || 'User'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {getRoleDisplayName(user?.role)}
+                </p>
               </div>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">User</p>
-              <p className="text-xs text-gray-500">Publisher</p>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              title="Logout"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>

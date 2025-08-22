@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # API Gateway with enterprise security
+  api-gateway:
+    build: 
+      context: .
+      dockerfile: ./api-gateway/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=production-jwt-secret-change-this
+      - API_KEY=production-api-key-change-this
+      - REDIS_URL=redis://redis:6379
+      - INVENTORY_SERVICE_URL=http://mock-services:3001
+      - ANALYTICS_SERVICE_URL=http://mock-services:3002
+      - AUDIO_SERVICE_URL=http://mock-services:8081
+      - RSS_SERVICE_URL=http://mock-services:3003
+      - RTB_ENGINE_URL=http://mock-services:8080
+    depends_on:
+      - redis
+      - mock-services
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+  # Dashboard (React frontend)
+  dashboard:
+    build: 
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+  # Redis for rate limiting and caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+  # Mock services for testing API Gateway routing
+  mock-services:
+    image: node:18-alpine
+    command: |
+      sh -c "
+        npm install -g json-server &&
+        echo '{
+          \"podcasters\": [
+            {\"id\": \"1\", \"name\": \"Tech Talk Daily\", \"email\": \"host@techtalking.com\", \"episodes\": 145, \"revenue\": 1234},
+            {\"id\": \"2\", \"name\": \"Morning Coffee Chat\", \"email\": \"morning@coffee.com\", \"episodes\": 89, \"revenue\": 987}
+          ],
+          \"advertisers\": [
+            {\"id\": \"1\", \"name\": \"TechCorp\", \"company_name\": \"Tech Corporation\", \"budget\": 50000},
+            {\"id\": \"2\", \"name\": \"StartupAds\", \"company_name\": \"Startup Advertising Inc\", \"budget\": 25000}
+          ],
+          \"campaigns\": [
+            {\"id\": \"1\", \"name\": \"Q4 Tech Product Launch\", \"status\": \"active\", \"budget\": 15000, \"spent\": 3200},
+            {\"id\": \"2\", \"name\": \"Holiday Sale Campaign\", \"status\": \"paused\", \"budget\": 8000, \"spent\": 1500}
+          ],
+          \"inventory\": [
+            {\"id\": \"1\", \"episode_id\": \"ep_001\", \"podcast_id\": \"1\", \"status\": \"available\", \"price_cpm\": 250},
+            {\"id\": \"2\", \"episode_id\": \"ep_002\", \"podcast_id\": \"2\", \"status\": \"booked\", \"price_cpm\": 300}
+          ],
+          \"analytics\": [
+            {\"id\": \"1\", \"event_type\": \"impression\", \"campaign_id\": \"1\", \"timestamp\": \"2024-01-01T10:00:00Z\"},
+            {\"id\": \"2\", \"event_type\": \"click\", \"campaign_id\": \"1\", \"timestamp\": \"2024-01-01T10:05:00Z\"}
+          ]
+        }' > db.json &&
+        echo 'Mock services starting...' &&
+        json-server --host 0.0.0.0 --port 3001 --routes routes.json db.json &
+        json-server --host 0.0.0.0 --port 3002 --routes routes.json db.json &
+        json-server --host 0.0.0.0 --port 3003 --routes routes.json db.json &
+        json-server --host 0.0.0.0 --port 8080 --routes routes.json db.json &
+        json-server --host 0.0.0.0 --port 8081 --routes routes.json db.json &
+        echo 'All mock services started' &&
+        tail -f /dev/null
+      "
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  campfire-network:
+    driver: bridge

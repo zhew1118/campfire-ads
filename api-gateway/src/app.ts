@@ -6,9 +6,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
 import { errorHandler } from './middleware/errorHandler';
-import { requestLogger } from './middleware/requestLogger';
-import { authMiddleware } from './middleware/auth';
+import { createAuthMiddleware, createSecurityLogger, defaultLogConfig } from '../../common/middleware';
 
+import authRouter from './routes/auth';
 import podcastersRouter from './routes/podcasters';
 import advertisersRouter from './routes/advertisers';
 import campaignsRouter from './routes/campaigns';
@@ -22,6 +22,11 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize common middleware
+const jwtSecret = process.env.JWT_SECRET || 'development-jwt-secret-key';
+const authMiddleware = createAuthMiddleware({ secret: jwtSecret });
+const securityLogger = createSecurityLogger(defaultLogConfig);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -37,7 +42,7 @@ app.use(compression());
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(requestLogger);
+app.use(securityLogger.requestLogger());
 
 app.get('/health', (req, res) => {
   res.status(200).json({ 
@@ -47,13 +52,16 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/podcasters', authMiddleware, podcastersRouter);
-app.use('/api/advertisers', authMiddleware, advertisersRouter);
-app.use('/api/campaigns', authMiddleware, campaignsRouter);
-app.use('/api/inventory', authMiddleware, inventoryRouter);
+// Authentication routes (public endpoints for login)
+app.use('/api/auth', authRouter);
+
+app.use('/api/podcasters', authMiddleware.validateJWT, podcastersRouter);
+app.use('/api/advertisers', authMiddleware.validateJWT, advertisersRouter);
+app.use('/api/campaigns', authMiddleware.validateJWT, campaignsRouter);
+app.use('/api/inventory', authMiddleware.validateJWT, inventoryRouter);
 app.use('/api/ads', adsRouter);
 app.use('/api/analytics', analyticsRouter);
-app.use('/api/audio', authMiddleware, audioRouter);
+app.use('/api/audio', authMiddleware.validateJWT, audioRouter);
 app.use('/api/rss', rssRouter);
 
 app.use('*', (req, res) => {

@@ -1,34 +1,29 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiService } from '../services/api';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'publisher' | 'advertiser'>('publisher');
+  const [role, setRole] = useState<'podcaster' | 'advertiser'>('podcaster');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, role }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        navigate('/');
-      } else {
-        console.error('Login failed');
-      }
-    } catch (error) {
+      const response = await apiService.login(email, password, role);
+      
+      // Store token and user data
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Navigate to dashboard
+      navigate('/');
+    } catch (error: any) {
       console.error('Login error:', error);
+      // You could add error state handling here
+      alert(error.response?.data?.error || 'Login failed');
     }
   };
 
@@ -87,9 +82,9 @@ const Login: React.FC = () => {
               <label className="flex items-center">
                 <input
                   type="radio"
-                  value="publisher"
-                  checked={role === 'publisher'}
-                  onChange={(e) => setRole(e.target.value as 'publisher')}
+                  value="podcaster"
+                  checked={role === 'podcaster'}
+                  onChange={(e) => setRole(e.target.value as 'podcaster')}
                   className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300"
                 />
                 <span className="ml-2 text-sm text-gray-700">Publisher (Podcaster)</span>

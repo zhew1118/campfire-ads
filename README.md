@@ -27,8 +27,9 @@ A modern, open-source podcast advertising platform that connects podcasters with
 
 ### Microservices Architecture
 - **API Gateway**: Node.js + Express.js with enterprise security (Phase 1 ✅)
+- **Dashboard Integration**: React app connected to secure API Gateway (Phase 2A ✅)
 - **Security Middleware**: Centralized JWT, rate limiting, validation, logging
-- **RTB Engine**: Go + gRPC for high-performance bidding - *Phase 2*
+- **RTB Engine**: Go + gRPC for high-performance bidding - *Phase 2B*
 - **Services**: Node.js microservices (inventory, analytics, audio, RSS)
 - **Database**: PostgreSQL 15+ with service-specific schemas
 - **Cache**: Redis 7+ for distributed rate limiting and session management
@@ -36,12 +37,13 @@ A modern, open-source podcast advertising platform that connects podcasters with
 - **Communication**: REST + gRPC for performance-critical paths
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
+- **Framework**: React 18 with TypeScript (Phase 2A ✅)
+- **Authentication**: JWT flow integrated with API Gateway (Phase 2A ✅)
 - **Build Tool**: Vite for fast development and builds
 - **Styling**: Tailwind CSS for modern UI design
 - **State**: Zustand for lightweight state management
 - **Charts**: Recharts for analytics visualization
-- **HTTP**: Axios for API communication
+- **HTTP**: Axios for API communication with authentication
 
 ### DevOps
 - **Containerization**: Docker + Docker Compose
@@ -55,13 +57,21 @@ A modern, open-source podcast advertising platform that connects podcasters with
 campfire-ads/
 ├── api-gateway/             # 🚀 Express.js API Gateway (Phase 1 ✅)
 │   ├── src/
-│   │   ├── routes/          # Route handlers for all services
-│   │   ├── middleware/      # Basic auth, logging, error handling
+│   │   ├── routes/          # Route handlers for all services + auth
+│   │   ├── middleware/      # Legacy middleware (cleaned up)
 │   │   ├── services/        # HTTP client & service discovery
 │   │   ├── app.ts           # Basic gateway application
-│   │   └── app-secure.ts    # 🔒 Enhanced security version
+│   │   └── app-secure.ts    # 🔒 Enhanced security version (ACTIVE)
 │   ├── Dockerfile           # Production container
 │   └── package.json
+├── dashboard/               # 📱 React Dashboard (Phase 2A ✅)
+│   ├── src/
+│   │   ├── components/      # Layout with user auth & logout
+│   │   ├── pages/          # Dashboard, Login, Podcasts, Campaigns
+│   │   ├── services/       # API client with JWT authentication
+│   │   └── main.tsx        # App entry point
+│   ├── Dockerfile          # Production nginx container
+│   └── vite.config.ts      # Dev proxy to API Gateway
 ├── common/                  # ✅ Centralized Security & Utilities
 │   ├── middleware/          # 🛡️ Enterprise security middleware
 │   │   ├── auth.ts          # JWT validation & role-based access
@@ -72,15 +82,14 @@ campfire-ads/
 │   │   └── README.md        # Comprehensive security docs
 │   ├── config/              # Security configuration management
 │   └── types/               # Shared TypeScript interfaces
-├── services/                # 🔄 Microservices (Phase 2-3)
+├── services/                # 🔄 Microservices (Phase 2B+)
 │   ├── inventory-service/   # Podcast & ad inventory management
 │   ├── rtb-engine/         # Go-based real-time bidding engine
 │   ├── analytics-service/   # Event tracking & reporting
 │   ├── audio-service/      # Dynamic ad insertion (Go + FFmpeg)
 │   └── rss-service/        # RSS feed generation with ads
-├── backend/                 # 📦 Legacy monolith (being extracted)
-├── frontend/                # 📱 React dashboard (unchanged)
 ├── docker-compose.yml       # Local development stack
+├── docker-compose.full.yml  # Complete stack with dashboard
 ├── stack.md                # 📋 Complete architecture specification
 └── CLAUDE.md               # 🤖 Claude Code init file
 ```
@@ -92,22 +101,29 @@ campfire-ads/
 - Docker & Docker Compose (optional)
 - Git
 
-### 🚀 API Gateway (Phase 1 Complete - Secure!)
+### 🚀 Complete Platform (Phase 2A Complete!)
 
-The API Gateway with enterprise security is ready:
+Full dashboard integration with secure API Gateway is ready:
 
 ```bash
-# Quick start - Secure API Gateway
+# Quick start - Complete Platform
+# Terminal 1: Secure API Gateway
 cd api-gateway
 npm install
-npm run dev:secure      # Enhanced security version
+npm run dev:secure      # Enhanced security with JWT auth
 
-# OR basic version
-npm run dev             # Basic version
+# Terminal 2: React Dashboard  
+cd dashboard
+npm install
+npm run dev             # Dashboard with API Gateway integration
 
-# Test functionality
-curl http://localhost:3000/health
+# Access: http://localhost:3001 (dashboard)
+# API: http://localhost:3000 (gateway)
 ```
+
+**Test Accounts:**
+- Podcaster: `test@example.com` / `password123` / `podcaster`
+- Advertiser: `advertiser@example.com` / `password123` / `advertiser`
 
 ### Automated Setup (Recommended)
 
@@ -164,23 +180,23 @@ chmod +x scripts/setup.sh
 
 ## 🌐 Access Points
 
-### Phase 1 Complete (Secure API Gateway) ✅
-- **API Gateway**: http://localhost:3000
-- **Health Check**: http://localhost:3000/health
-- **All API Routes**: http://localhost:3000/api/*
-- **Security**: Enterprise middleware with JWT, rate limiting, validation
-- **Performance**: <10ms routing overhead, RTB-optimized
+### Phase 2A Complete (Full Dashboard Integration) ✅
+- **Dashboard**: http://localhost:3001 - React app with authentication
+- **API Gateway**: http://localhost:3000 - Secure gateway with JWT auth
+- **Authentication**: `/api/auth/login` - JWT token generation
+- **All API Routes**: http://localhost:3000/api/* - Protected with JWT/API keys
+- **Security**: Enterprise middleware with rate limiting, validation, logging
+- **Performance**: <10ms routing, RTB-optimized, end-to-end working
 
-### Phase 2A Next (Dashboard Integration) 🔄
-- **Dashboard**: Connect React app to secure API Gateway
-- **Authentication**: Integrate JWT flow with API Gateway
-- **Testing**: End-to-end dashboard → API Gateway → mock responses
-- **Timeline**: Immediate (1-2 hours) - foundation ready
+### Phase 2B Next (RTB Engine + Service Extraction) 🔄
+- **RTB Engine**: Go-based real-time bidding engine
+- **Service Extraction**: Extract inventory, analytics, audio services
+- **Performance**: gRPC communication for critical paths
+- **Timeline**: Ready for implementation - foundation complete
 
-### Legacy Stack
-- **Frontend Dashboard**: http://localhost:3000 (legacy)
-- **Backend API**: http://localhost:3001 (legacy)
+### Legacy Stack (Optional)
 - **Prebid Server**: http://localhost:8000 (if running)
+- **Legacy Backend**: Deprecated in favor of API Gateway
 
 ## 📊 Database
 
@@ -193,7 +209,8 @@ Database connection details are configured through environment variables. Copy `
 
 The API Gateway provides unified access to all microservices with enterprise security:
 
-### 🚀 Live Routes (Phase 1 Complete)
+### 🚀 Live Routes (Phase 2A Complete)
+- **`/api/auth/login`** - User authentication + JWT generation (public)
 - **`/api/podcasters`** - Podcaster management + earnings (JWT protected)
 - **`/api/advertisers`** - Advertiser accounts + billing (JWT protected)
 - **`/api/campaigns`** - Campaign CRUD + RTB integration (JWT protected)
@@ -267,13 +284,16 @@ docker-compose down
 ## 📈 Roadmap
 
 ### Current Status
-- ✅ **Foundation**: Project structure, database schema, authentication
-- ✅ **Core Setup**: React dashboard, API routes, Docker environment
+- ✅ **Phase 1**: API Gateway with enterprise security middleware
+- ✅ **Phase 2A**: Dashboard integration with JWT authentication
+- ✅ **Security**: Enterprise-grade authentication, rate limiting, validation
+- ✅ **Foundation**: Complete platform foundation ready
 
-### Upcoming Features
+### Upcoming Features (Phase 2B+)
+- **RTB Engine**: Go-based real-time bidding system
+- **Service Extraction**: Microservices for inventory, analytics, audio
 - **Publisher Tools**: RSS feed integration, episode management
-- **Advertiser Platform**: Campaign creation and management tools  
-- **RTB System**: Real-time bidding and auction system
+- **Advertiser Platform**: Advanced campaign creation and management tools  
 - **Audio Processing**: Dynamic ad insertion capabilities
 
 See our [Issues](../../issues) and [Projects](../../projects) for detailed development tracking.
@@ -305,4 +325,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Enterprise-grade podcast advertising platform** 🎙️  
-**Phase 1 Complete ✅ | Phase 2A Ready 🔄 | Dashboard Integration Next**
+**Phase 1 Complete ✅ | Phase 2A Complete ✅ | RTB Engine Next 🔄**
