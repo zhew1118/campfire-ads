@@ -7,6 +7,28 @@ This file contains project context and commonly used commands for the Campfire A
 **⚡ For complete architecture details, see: [`stack.md`](./stack.md)**  
 The stack.md file contains the full microservices architecture specification, service communication patterns, performance targets, and migration roadmap.
 
+## 🔄 **DOCUMENTATION UPDATE RULE**
+
+**🚨 CRITICAL: When completing any major phase or milestone:**
+
+1. **Update all three documentation files in order:**
+   - `README.md` - Project overview, quick start, current features
+   - `CLAUDE.md` - Development commands, testing procedures, current status  
+   - `stack.md` - Architecture progress, phase completion, performance results
+
+2. **Update content consistently across files:**
+   - ✅ Mark completed phases and features
+   - 🔄 Update "Next" sections and roadmap
+   - 📊 Add performance results and testing outcomes
+   - 🏗️ Reflect current project structure
+
+3. **Commit documentation updates together:**
+   - Create single commit with all three file updates
+   - Use descriptive commit message explaining what was completed
+   - Ensure future Claude sessions get accurate project state
+
+**This ensures documentation stays synchronized and Claude sessions have accurate context.**
+
 ## 🎯 Current Status: **Phase 1 Complete + Security Enhanced** ✅
 
 - ✅ **API Gateway**: Secure routing with enterprise middleware
@@ -230,7 +252,12 @@ cd common/middleware && npm test
 
 ## 📁 Key Files to Know
 
+### 📋 Documentation (ALWAYS update together after major phases!)
+- **`README.md`** - Project overview, features, quick start guide
+- **`CLAUDE.md`** - **THIS FILE** - Development commands, testing, status
 - **`stack.md`** - 📋 **COMPLETE ARCHITECTURE SPECIFICATION** (read this first!)
+
+### 🛡️ Core Implementation  
 - `api-gateway/src/app-secure.ts` - 🛡️ Production API Gateway with enterprise security
 - `api-gateway/src/app.ts` - Basic API Gateway version  
 - `api-gateway/src/routes/` - All route handlers for 8 service groups
