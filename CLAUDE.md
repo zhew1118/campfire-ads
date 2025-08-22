@@ -36,7 +36,26 @@ The stack.md file contains the full microservices architecture specification, se
 - ✅ **Rate Limiting**: Redis-powered (10k req/s RTB optimized)
 - ✅ **Security**: Comprehensive logging, validation, headers
 - ✅ **Testing**: All security features verified
-- 🔄 **Ready**: Phase 2 RTB Engine and service extraction
+
+## 🚀 **Next Priority: Phase 2A - Dashboard Integration** 🔄
+
+**IMMEDIATE** (1-2 hours) - Connect dashboard to secure API Gateway:
+
+1. **Update Dashboard API Client** 
+   - Change base URL from legacy backend to API Gateway (`http://localhost:3000`)
+   - Update authentication endpoints and token handling
+   - Test all dashboard API calls through gateway
+
+2. **End-to-End Testing**
+   - Dashboard login → API Gateway JWT flow
+   - Dashboard pages → API Gateway routes → mock responses  
+   - Verify security features work with real UI
+
+3. **Benefits of Connecting Now**
+   - ✅ Full security testing with real UI interactions
+   - ✅ Immediate feedback on API Gateway performance
+   - ✅ Ready foundation for when microservices are added
+   - ✅ Complete authentication/authorization validation
 
 ## 🛠️ Common Commands
 
@@ -269,9 +288,10 @@ cd common/middleware && npm test
 
 ---
 
-## 🚀 Phase 2 Ready
+## 🚀 Phase 2A Ready - Dashboard Integration
 
-**Next**: RTB Engine + Service Extraction  
+**IMMEDIATE**: Connect dashboard to API Gateway (1-2 hours)  
+**NEXT**: Phase 2B - RTB Engine + Service Extraction  
 **Architecture**: See [`stack.md`](./stack.md) for complete microservices roadmap
 
-🔥🎙️ **Secure foundation complete - ready for high-performance microservices!**
+🔥🎙️ **Secure foundation complete - ready for dashboard integration!**
