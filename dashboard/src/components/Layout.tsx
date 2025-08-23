@@ -24,12 +24,32 @@ const Layout: React.FC = () => {
     }
   }, [navigate]);
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'Podcasts', href: '/podcasts', icon: MicrophoneIcon },
-    { name: 'Campaigns', href: '/campaigns', icon: SpeakerWaveIcon },
-    { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-  ];
+  // Role-based navigation according to stack.md business logic
+  const getNavigationForRole = (role: string) => {
+    if (role === 'podcaster') {
+      // Podcasters (Supply Side) - manage their inventory
+      return [
+        { name: 'Dashboard', href: '/', icon: HomeIcon },
+        { name: 'My Podcasts', href: '/podcasts', icon: MicrophoneIcon },
+        { name: 'Episodes', href: '/episodes', icon: SpeakerWaveIcon },
+        { name: 'Ad Slots', href: '/slots', icon: ChartBarIcon },
+      ];
+    } else if (role === 'advertiser') {
+      // Advertisers (Demand Side) - browse inventory and manage campaigns
+      return [
+        { name: 'Dashboard', href: '/', icon: HomeIcon },
+        { name: 'Browse Inventory', href: '/inventory', icon: MicrophoneIcon },
+        { name: 'My Campaigns', href: '/campaigns', icon: SpeakerWaveIcon },
+        { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+      ];
+    }
+    // Default fallback
+    return [
+      { name: 'Dashboard', href: '/', icon: HomeIcon },
+    ];
+  };
+
+  const navigation = getNavigationForRole(user?.role);
 
   const handleLogout = () => {
     // Clear authentication data

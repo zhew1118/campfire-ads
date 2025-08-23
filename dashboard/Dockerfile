@@ -35,7 +35,7 @@ RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
     echo '' >> /etc/nginx/conf.d/default.conf && \
     echo '    # Proxy API requests to API Gateway' >> /etc/nginx/conf.d/default.conf && \
     echo '    location /api/ {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        proxy_pass http://api-gateway:3000/api/;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        proxy_pass http://api-gateway:3000;' >> /etc/nginx/conf.d/default.conf && \
     echo '        proxy_http_version 1.1;' >> /etc/nginx/conf.d/default.conf && \
     echo '        proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/conf.d/default.conf && \
     echo '        proxy_set_header Connection "upgrade";' >> /etc/nginx/conf.d/default.conf && \

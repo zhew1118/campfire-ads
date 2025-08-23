@@ -112,7 +112,8 @@ export const commonSchemas = {
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20),
     sort: Joi.string().valid('asc', 'desc').default('desc'),
-    sortBy: Joi.string().default('created_at')
+    sortBy: Joi.string().default('created_at'),
+    user_id: Joi.string().optional()
   }),
 
   // User identification
@@ -175,6 +176,56 @@ export const commonSchemas = {
       explicit: Joi.boolean().optional(),
       website: Joi.string().uri().optional(),
       author: Joi.string().max(100).optional()
+    })
+  },
+
+  // Episode schemas
+  episode: {
+    create: Joi.object({
+      title: Joi.string().min(3).max(200).required(),
+      description: Joi.string().max(1000).optional(),
+      duration: Joi.number().integer().min(1).required(), // seconds
+      audio_url: Joi.string().uri().required(),
+      file_size: Joi.number().integer().min(1).optional(), // bytes
+      episode_number: Joi.number().integer().min(1).optional(),
+      season_number: Joi.number().integer().min(1).optional(),
+      published_at: Joi.date().iso().optional(),
+      status: Joi.string().valid('draft', 'published', 'archived').default('draft')
+    }),
+
+    update: Joi.object({
+      title: Joi.string().min(3).max(200).optional(),
+      description: Joi.string().max(1000).optional(),
+      duration: Joi.number().integer().min(1).optional(),
+      audio_url: Joi.string().uri().optional(),
+      file_size: Joi.number().integer().min(1).optional(),
+      episode_number: Joi.number().integer().min(1).optional(),
+      season_number: Joi.number().integer().min(1).optional(),
+      published_at: Joi.date().iso().optional(),
+      status: Joi.string().valid('draft', 'published', 'archived').optional()
+    })
+  },
+
+  // Ad slot schemas
+  adSlot: {
+    create: Joi.object({
+      position: Joi.string().valid('pre_roll', 'mid_roll', 'post_roll').required(),
+      duration: Joi.number().integer().min(5).max(120).required(), // 5 seconds to 2 minutes
+      cpm_floor: Joi.number().precision(2).min(0.01).required(), // minimum CPM in dollars
+      available: Joi.boolean().default(true),
+      start_time: Joi.number().integer().min(0).optional() // seconds from episode start (for mid-roll)
+    }),
+
+    update: Joi.object({
+      position: Joi.string().valid('pre_roll', 'mid_roll', 'post_roll').optional(),
+      duration: Joi.number().integer().min(5).max(120).optional(),
+      cpm_floor: Joi.number().precision(2).min(0.01).optional(),
+      available: Joi.boolean().optional(),
+      start_time: Joi.number().integer().min(0).optional()
+    }),
+
+    pricing: Joi.object({
+      cpm_floor: Joi.number().precision(2).min(0.01).required()
     })
   },
 

@@ -1,22 +1,7 @@
 import { Router, Request, Response } from 'express';
+import { query } from '../../../common/middleware';
 
 const router = Router();
-
-// Mock user database for development (matches CLAUDE.md test credentials)
-const mockUsers = [
-  {
-    id: 'test-user',
-    email: 'test@example.com',
-    password: 'password123', // In production, this would be properly hashed
-    role: 'podcaster' as const
-  },
-  {
-    id: 'advertiser-user', 
-    email: 'advertiser@example.com',
-    password: 'password123',
-    role: 'advertiser' as const
-  }
-];
 
 /**
  * POST /login
@@ -35,14 +20,25 @@ router.post('/login', async (req: Request, res: Response) => {
       });
     }
 
-    // Find user in mock database
-    const user = mockUsers.find(u => 
-      u.email === email && 
-      u.password === password &&
-      (!role || u.role === role) // Role is optional, but if provided must match
-    );
+    // Query user from database
+    const result = await query(`
+      SELECT id, email, role, first_name, last_name, company_name
+      FROM users 
+      WHERE email = $1 AND ($2::text IS NULL OR role = $2)
+    `, [email, role || null]);
 
-    if (!user) {
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        error: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS'
+      });
+    }
+
+    const user = result.rows[0];
+    
+    // For development, accept password123 for all users
+    // In production, verify against password_hash field
+    if (password !== 'password123') {
       return res.status(401).json({
         error: 'Invalid credentials',
         code: 'INVALID_CREDENTIALS'

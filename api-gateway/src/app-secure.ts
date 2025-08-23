@@ -11,16 +11,19 @@ import {
   createSecurityMiddleware,
   commonLimits,
   defaultLogConfig,
-  defaultSecurityConfig
+  defaultSecurityConfig,
+  errorHandler,
+  notFoundHandler
 } from '../../common/middleware';
-
-import { errorHandler } from './middleware/errorHandler';
 
 import authRouter from './routes/auth';
 import podcastersRouter from './routes/podcasters';
 import advertisersRouter from './routes/advertisers';
 import campaignsRouter from './routes/campaigns';
 import inventoryRouter from './routes/inventory';
+import podcastsRouter from './routes/podcasts';
+import episodesRouter from './routes/episodes';
+import slotsRouter from './routes/slots';
 import adsRouter from './routes/ads';
 import analyticsRouter from './routes/analytics';
 import audioRouter from './routes/audio';
@@ -134,6 +137,21 @@ app.use('/api/inventory',
   inventoryRouter
 );
 
+app.use('/api/podcasts', 
+  authMiddleware.validateJWT,
+  podcastsRouter
+);
+
+app.use('/api/episodes', 
+  authMiddleware.validateJWT,
+  episodesRouter
+);
+
+app.use('/api/slots', 
+  authMiddleware.validateJWT,
+  slotsRouter
+);
+
 // RTB endpoints use API key authentication
 app.use('/api/ads', 
   authMiddleware.validateAPIKey(process.env.API_KEY || 'development-api-key'),
@@ -152,18 +170,16 @@ app.use('/api/audio',
 // RSS endpoints are public but rate limited
 app.use('/api/rss', rssRouter);
 
-// 404 handler
-app.use('*', (req, res) => {
+// Enhanced 404 handler with security logging
+app.use('*', (req, res, next) => {
   securityLogger.logSecurityEvent('ROUTE_NOT_FOUND', req, {
     attempted_path: req.originalUrl,
     method: req.method
   });
-  
-  res.status(404).json({ 
-    error: 'Route not found',
-    code: 'ROUTE_NOT_FOUND'
-  });
+  next(); // Let the common notFoundHandler handle the actual response
 });
+
+app.use(notFoundHandler);
 
 // Enhanced error handler with security logging
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -176,7 +192,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     });
   }
 
-  // Use existing error handler
+  // Use common error handler
   errorHandler(err, req, res, next);
 });
 

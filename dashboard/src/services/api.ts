@@ -45,11 +45,11 @@ export const apiService = {
   login: (email: string, password: string, role: string) =>
     api.post('/auth/login', { email, password, role }),
 
-  // Podcasters
-  getPodcasters: () => api.get('/podcasters'),
-  createPodcaster: (data: any) => api.post('/podcasters', data),
-  updatePodcaster: (id: string, data: any) => api.put(`/podcasters/${id}`, data),
-  deletePodcaster: (id: string) => api.delete(`/podcasters/${id}`),
+  // Podcasts
+  getPodcasts: () => api.get('/podcasts?page=1&limit=20&sort=desc&sortBy=created_at'),
+  createPodcast: (data: any) => api.post('/podcasts', data),
+  updatePodcast: (id: string, data: any) => api.put(`/podcasts/${id}`, data),
+  deletePodcast: (id: string) => api.delete(`/podcasts/${id}`),
 
   // Advertisers
   getAdvertisers: () => api.get('/advertisers'),

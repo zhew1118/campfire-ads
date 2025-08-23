@@ -1,7 +1,7 @@
 export class ServiceDiscovery {
   static getServiceURL(serviceName: string): string {
     const services = {
-      inventory: process.env.INVENTORY_SERVICE_URL || 'http://localhost:3001',
+      inventory: process.env.INVENTORY_SERVICE_URL || 'http://localhost:3004',
       analytics: process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3002',
       audio: process.env.AUDIO_SERVICE_URL || 'http://localhost:8081',
       rss: process.env.RSS_SERVICE_URL || 'http://localhost:3003',

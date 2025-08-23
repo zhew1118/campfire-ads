@@ -5,14 +5,16 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-import { errorHandler } from './middleware/errorHandler';
-import { createAuthMiddleware, createSecurityLogger, defaultLogConfig } from '../../common/middleware';
+import { createAuthMiddleware, createSecurityLogger, defaultLogConfig, errorHandler, notFoundHandler } from '../../common/middleware';
 
 import authRouter from './routes/auth';
 import podcastersRouter from './routes/podcasters';
 import advertisersRouter from './routes/advertisers';
 import campaignsRouter from './routes/campaigns';
 import inventoryRouter from './routes/inventory';
+import podcastsRouter from './routes/podcasts';
+import episodesRouter from './routes/episodes';
+import slotsRouter from './routes/slots';
 import adsRouter from './routes/ads';
 import analyticsRouter from './routes/analytics';
 import audioRouter from './routes/audio';
@@ -59,15 +61,15 @@ app.use('/api/podcasters', authMiddleware.validateJWT, podcastersRouter);
 app.use('/api/advertisers', authMiddleware.validateJWT, advertisersRouter);
 app.use('/api/campaigns', authMiddleware.validateJWT, campaignsRouter);
 app.use('/api/inventory', authMiddleware.validateJWT, inventoryRouter);
+app.use('/api/podcasts', authMiddleware.validateJWT, podcastsRouter);
+app.use('/api/episodes', authMiddleware.validateJWT, episodesRouter);
+app.use('/api/slots', authMiddleware.validateJWT, slotsRouter);
 app.use('/api/ads', adsRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/audio', authMiddleware.validateJWT, audioRouter);
 app.use('/api/rss', rssRouter);
 
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 if (process.env.NODE_ENV !== 'test') {

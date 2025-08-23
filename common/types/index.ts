@@ -89,6 +89,53 @@ export interface AnalyticsEvent {
   metadata?: object;
 }
 
+export interface Podcast {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  rss_url?: string;
+  podcaster_id: string;
+  status: 'active' | 'inactive' | 'pending';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Episode {
+  id: string;
+  podcast_id: string;
+  title: string;
+  description?: string;
+  duration?: number;
+  audio_url?: string;
+  published_at?: string;
+  status: 'draft' | 'published' | 'archived';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdSlot {
+  id: string;
+  episode_id: string;
+  position: 'pre_roll' | 'mid_roll' | 'post_roll';
+  duration: number;
+  cpm_floor: number;
+  available: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  role: 'podcaster' | 'advertiser' | 'admin';
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface APIResponse<T = any> {
   data?: T;
   error?: string;

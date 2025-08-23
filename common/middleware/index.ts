@@ -13,9 +13,16 @@ export * from './logging';
 // Security Headers & Protection
 export * from './security';
 
+// Error Handling
+export * from './errorHandler';
+
+// Database utilities
+export * from './database';
+
 // Re-export commonly used types and interfaces
 export type { AuthenticatedRequest, JWTConfig } from './auth';
 export type { RateLimitConfig, RateLimitInfo } from './rateLimiting';
 export type { ValidationConfig, ValidationError } from './validation';
 export type { SecurityLogConfig, LogContext } from './logging';
 export type { SecurityConfig } from './security';
+export type { AppError } from './errorHandler';

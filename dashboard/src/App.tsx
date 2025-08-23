@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Podcasts from './pages/Podcasts';
 import Campaigns from './pages/Campaigns';
+import Inventory from './pages/Inventory';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="podcasts" element={<Podcasts />} />
             <Route path="campaigns" element={<Campaigns />} />
+            <Route path="inventory" element={<Inventory />} />
           </Route>
         </Routes>
       </div>

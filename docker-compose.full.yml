@@ -14,13 +14,20 @@ services:
       - JWT_SECRET=production-jwt-secret-change-this
       - API_KEY=production-api-key-change-this
       - REDIS_URL=redis://redis:6379
-      - INVENTORY_SERVICE_URL=http://mock-services:3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=campfire_ads
+      - DB_USER=campfire_user
+      - DB_PASSWORD=campfire_password
+      - DB_SSL=false
+      - INVENTORY_SERVICE_URL=http://inventory-service:3004
       - ANALYTICS_SERVICE_URL=http://mock-services:3002
       - AUDIO_SERVICE_URL=http://mock-services:8081
       - RSS_SERVICE_URL=http://mock-services:3003
       - RTB_ENGINE_URL=http://mock-services:8080
     depends_on:
       - redis
+      - inventory-service
       - mock-services
     networks:
       - campfire-network
@@ -47,6 +54,48 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+  # PostgreSQL database for inventory service
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=campfire_ads
+      - POSTGRES_USER=campfire_user
+      - POSTGRES_PASSWORD=campfire_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./services/inventory-service/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+  # Inventory Service (Node.js + PostgreSQL)
+  inventory-service:
+    build:
+      context: .
+      dockerfile: ./services/inventory-service/Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - DATABASE_URL=postgresql://campfire_user:campfire_password@postgres:5432/campfire_ads
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=campfire_ads
+      - DB_USER=campfire_user
+      - DB_PASSWORD=campfire_password
+      - DB_SSL=false
+      - JWT_SECRET=production-jwt-secret-change-this
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
     networks:
       - campfire-network
     restart: unless-stopped
@@ -94,6 +143,7 @@ services:
 
 volumes:
   redis-data:
+  postgres-data:
 
 networks:
   campfire-network:
