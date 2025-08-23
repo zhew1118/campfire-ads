@@ -4,46 +4,52 @@ A modern, open-source podcast advertising platform that connects podcasters with
 
 ## 🚀 Features
 
-### For Publishers (Podcasters)
-- **RSS Feed Integration**: Automatically sync podcast episodes from RSS feeds
-- **Ad Slot Management**: Configure pre-roll, mid-roll, and post-roll ad inventory
-- **Revenue Analytics**: Real-time revenue tracking and performance metrics
-- **Audio Processing**: Automated ad insertion into podcast episodes
+### For Publishers (Podcasters) - Supply Side ✅
+- **Podcast Management**: Create and manage podcast inventory with metadata
+- **Episode Management**: Add episodes and organize content structure  
+- **Ad Slot Configuration**: Define pre-roll, mid-roll, and post-roll ad slots
+- **CPM Floor Pricing**: Set minimum pricing for ad slot inventory
+- **Revenue Analytics**: Track earnings and inventory performance
+- **Role-Based Dashboard**: Dedicated supply-side management interface
 
-### For Advertisers
+### For Advertisers - Demand Side ✅
+- **Inventory Discovery**: Browse available ad slots across all podcasts
 - **Campaign Management**: Create and manage targeted advertising campaigns
-- **Real-Time Bidding**: Compete for ad slots through automated auctions
-- **Advanced Targeting**: Target by podcast category, audience demographics, and more
-- **Performance Tracking**: Monitor impressions, clicks, and campaign ROI
+- **Real-Time Bidding**: Future RTB integration for automated auctions
+- **Category Targeting**: Target by podcast categories and demographics
+- **Performance Tracking**: Monitor campaign performance and ROI
+- **Role-Based Dashboard**: Dedicated demand-side browsing interface
 
-### Platform Features
-- **RTB Integration**: Powered by Prebid Server for industry-standard auctions
-- **Modern Dashboard**: React-based interface with real-time updates
+### Platform Features ✅
+- **Two-Sided Marketplace**: Separate workflows for supply (podcasters) and demand (advertisers)
+- **Role-Based Authentication**: Production database-connected auth with real user UUIDs
+- **Modern Dashboard**: React-based interface with role-specific navigation
 - **Enterprise Security**: Centralized security middleware with JWT, rate limiting, validation
 - **Scalable Architecture**: Microservices-ready with API Gateway and shared middleware
-- **Audio Processing**: FFmpeg-powered ad insertion and audio processing
+- **Business Logic Implementation**: Complete supply/demand separation following industry standards
 
 ## 🏗️ Technology Stack
 
 ### Microservices Architecture
-- **API Gateway**: Node.js + Express.js with enterprise security (Phase 1 ✅)
-- **Dashboard Integration**: React app connected to secure API Gateway (Phase 2A ✅)
-- **Security Middleware**: Centralized JWT, rate limiting, validation, logging
-- **RTB Engine**: Go + gRPC for high-performance bidding - *Phase 2B*
-- **Services**: Node.js microservices (inventory, analytics, audio, RSS)
-- **Database**: PostgreSQL 15+ with service-specific schemas
-- **Cache**: Redis 7+ for distributed rate limiting and session management
-- **Audio**: Go + FFmpeg for dynamic ad insertion
+- **API Gateway**: Node.js + Express.js with enterprise security (✅ Phase 1 Complete)
+- **Dashboard Integration**: React app with role-based UI (✅ Phase 2A Complete)  
+- **Inventory Service**: Node.js + PostgreSQL for podcast/episode management (✅ Phase 2A.5 Complete)
+- **Business Logic**: Two-sided marketplace with supply/demand separation (✅ Phase 2A.5 Complete)
+- **Security Middleware**: Centralized JWT, rate limiting, validation, logging (✅ Complete)
+- **Database**: PostgreSQL 15+ with production-ready schemas (✅ Complete)
+- **Cache**: Redis 7+ for distributed rate limiting and session management (✅ Complete)
+- **RTB Engine**: Go + gRPC for high-performance bidding (*Phase 2B - Next*)
+- **Audio Processing**: Go + FFmpeg for dynamic ad insertion (*Future*)
 - **Communication**: REST + gRPC for performance-critical paths
 
 ### Frontend
-- **Framework**: React 18 with TypeScript (Phase 2A ✅)
-- **Authentication**: JWT flow integrated with API Gateway (Phase 2A ✅)
-- **Build Tool**: Vite for fast development and builds
-- **Styling**: Tailwind CSS for modern UI design
-- **State**: Zustand for lightweight state management
-- **Charts**: Recharts for analytics visualization
-- **HTTP**: Axios for API communication with authentication
+- **Framework**: React 18 with TypeScript (✅ Complete)
+- **Authentication**: JWT flow with role-based navigation (✅ Phase 2A.5 Complete)
+- **Business Logic**: Role-specific UI flows for podcasters vs advertisers (✅ Complete)
+- **Build Tool**: Vite for fast development and builds (✅ Complete)
+- **Styling**: Tailwind CSS for modern UI design (✅ Complete)
+- **State**: Local state management with React hooks (✅ Complete)
+- **HTTP**: Axios for API communication with JWT authentication (✅ Complete)
 
 ### DevOps
 - **Containerization**: Docker + Docker Compose
@@ -82,12 +88,12 @@ campfire-ads/
 │   │   └── README.md        # Comprehensive security docs
 │   ├── config/              # Security configuration management
 │   └── types/               # Shared TypeScript interfaces
-├── services/                # 🔄 Microservices (Phase 2B+)
-│   ├── inventory-service/   # Podcast & ad inventory management
-│   ├── rtb-engine/         # Go-based real-time bidding engine
-│   ├── analytics-service/   # Event tracking & reporting
-│   ├── audio-service/      # Dynamic ad insertion (Go + FFmpeg)
-│   └── rss-service/        # RSS feed generation with ads
+├── services/                # 🔄 Microservices
+│   ├── inventory-service/   # ✅ Podcast & ad inventory management (Phase 2A.5)
+│   ├── rtb-engine/         # Go-based real-time bidding engine (Phase 2B)
+│   ├── analytics-service/   # Event tracking & reporting (Future)
+│   ├── audio-service/      # Dynamic ad insertion (Future)
+│   └── rss-service/        # RSS feed generation with ads (Future)
 ├── docker-compose.yml       # Local development stack
 ├── docker-compose.full.yml  # Complete stack with dashboard
 ├── stack.md                # 📋 Complete architecture specification
@@ -101,12 +107,26 @@ campfire-ads/
 - Docker & Docker Compose (optional)
 - Git
 
-### 🚀 Complete Platform (Phase 2A Complete!)
+### 🚀 Complete Platform (Phase 2A.5 Complete!)
 
-Full dashboard integration with secure API Gateway is ready:
+Full two-sided marketplace with role-based business logic is ready:
 
 ```bash
-# Quick start - Complete Platform
+# Quick start - Complete Platform with Docker
+docker-compose -f docker-compose.full.yml up --build -d
+
+# Access: http://localhost:3001 (dashboard)
+# API: http://localhost:3000 (gateway)
+```
+
+**Test Accounts with Role-Based Workflows:**
+- **Podcaster (Supply Side)**: `test@example.com` / `password123` / `podcaster`
+  - Navigation: My Podcasts → Episodes → Ad Slots → CPM Pricing
+- **Advertiser (Demand Side)**: `advertiser@example.com` / `password123` / `advertiser`
+  - Navigation: Browse Inventory → Available Slots → Create Campaigns
+
+### Manual Development Setup
+```bash
 # Terminal 1: Secure API Gateway
 cd api-gateway
 npm install
@@ -115,15 +135,13 @@ npm run dev:secure      # Enhanced security with JWT auth
 # Terminal 2: React Dashboard  
 cd dashboard
 npm install
-npm run dev             # Dashboard with API Gateway integration
+npm run dev             # Dashboard with role-based UI
 
-# Access: http://localhost:3001 (dashboard)
-# API: http://localhost:3000 (gateway)
+# Terminal 3: Inventory Service
+cd services/inventory-service
+npm install
+npm run dev             # Podcast/episode management service
 ```
-
-**Test Accounts:**
-- Podcaster: `test@example.com` / `password123` / `podcaster`
-- Advertiser: `advertiser@example.com` / `password123` / `advertiser`
 
 ### Automated Setup (Recommended)
 
@@ -180,19 +198,21 @@ chmod +x scripts/setup.sh
 
 ## 🌐 Access Points
 
-### Phase 2A Complete (Full Dashboard Integration) ✅
-- **Dashboard**: http://localhost:3001 - React app with authentication
-- **API Gateway**: http://localhost:3000 - Secure gateway with JWT auth
-- **Authentication**: `/api/auth/login` - JWT token generation
+### Phase 2A.5 Complete (Business Logic Implementation) ✅
+- **Dashboard**: http://localhost:3001 - Role-based React app with two-sided marketplace UI
+- **API Gateway**: http://localhost:3000 - Secure gateway with production database auth
+- **Inventory Service**: http://localhost:3004 - Podcast/episode management service
+- **Authentication**: Database-connected auth with real user UUIDs and role-based navigation
+- **Business Logic**: Complete supply/demand separation with role-specific workflows
 - **All API Routes**: http://localhost:3000/api/* - Protected with JWT/API keys
 - **Security**: Enterprise middleware with rate limiting, validation, logging
-- **Performance**: <10ms routing, RTB-optimized, end-to-end working
+- **Performance**: <10ms routing, RTB-optimized, production-ready
 
-### Phase 2B Next (RTB Engine + Service Extraction) 🔄
-- **RTB Engine**: Go-based real-time bidding engine
-- **Service Extraction**: Extract inventory, analytics, audio services
-- **Performance**: gRPC communication for critical paths
-- **Timeline**: Ready for implementation - foundation complete
+### Phase 2B Next (RTB Engine + Service Completion) 🔄  
+- **RTB Engine**: Go-based real-time bidding engine for sub-10ms responses
+- **Service Extraction**: Complete analytics, audio processing, RSS services
+- **Performance**: gRPC communication for performance-critical paths
+- **Timeline**: Ready for implementation - complete foundation established
 
 ### Legacy Stack (Optional)
 - **Prebid Server**: http://localhost:8000 (if running)
@@ -209,16 +229,17 @@ Database connection details are configured through environment variables. Copy `
 
 The API Gateway provides unified access to all microservices with enterprise security:
 
-### 🚀 Live Routes (Phase 2A Complete)
-- **`/api/auth/login`** - User authentication + JWT generation (public)
-- **`/api/podcasters`** - Podcaster management + earnings (JWT protected)
-- **`/api/advertisers`** - Advertiser accounts + billing (JWT protected)
-- **`/api/campaigns`** - Campaign CRUD + RTB integration (JWT protected)
-- **`/api/inventory`** - Podcast inventory + search (JWT protected)
-- **`/api/ads`** - Real-time bidding + tracking (API key protected)
-- **`/api/analytics`** - Event tracking + reports (public with validation)
-- **`/api/audio`** - Dynamic ad insertion + downloads (JWT protected)
-- **`/api/rss`** - RSS feed generation + caching (public with rate limits)
+### 🚀 Live Routes (Phase 2A.5 Complete)
+- **`/api/auth/login`** - Database authentication + JWT with user UUIDs (public)
+- **`/api/podcasts`** - Podcast CRUD operations for podcasters (JWT protected)
+- **`/api/podcasts/:id/episodes`** - Episode management (JWT protected)  
+- **`/api/episodes/:id/slots`** - Ad slot configuration with CPM pricing (JWT protected)
+- **`/api/inventory/available`** - Browse available inventory for advertisers (JWT protected)
+- **`/api/campaigns`** - Campaign management for advertisers (JWT protected)
+- **`/api/ads`** - Real-time bidding + tracking (API key protected, Phase 2B)
+- **`/api/analytics`** - Event tracking + reports (public with validation, Phase 2B)
+- **`/api/audio`** - Dynamic ad insertion (JWT protected, Future)
+- **`/api/rss`** - RSS feed generation (public with rate limits, Future)
 
 ### 🛡️ Security Features
 - **JWT Authentication** with role-based access control
@@ -286,17 +307,21 @@ docker-compose down
 ### Current Status
 - ✅ **Phase 1**: API Gateway with enterprise security middleware
 - ✅ **Phase 2A**: Dashboard integration with JWT authentication  
+- ✅ **Phase 2A.5**: Complete business logic implementation with two-sided marketplace
+- ✅ **Inventory Service**: Working podcast/episode/ad slot management
+- ✅ **Role-Based UI**: Supply-side (podcasters) and demand-side (advertisers) workflows
+- ✅ **Database Integration**: Production-ready PostgreSQL with real user authentication
 - ✅ **Security**: Enterprise-grade authentication, rate limiting, validation
-- ✅ **TypeScript**: All middleware compilation issues resolved
+- ✅ **TypeScript**: All services compile and run successfully
 - ✅ **Docker**: Full containerization with production-ready builds
-- ✅ **Foundation**: Complete platform foundation ready for deployment
+- ✅ **Foundation**: Complete two-sided marketplace platform ready for RTB engine
 
-### Upcoming Features (Phase 2B+)
-- **RTB Engine**: Go-based real-time bidding system
-- **Service Extraction**: Microservices for inventory, analytics, audio
-- **Publisher Tools**: RSS feed integration, episode management
-- **Advertiser Platform**: Advanced campaign creation and management tools  
-- **Audio Processing**: Dynamic ad insertion capabilities
+### Upcoming Features (Phase 2B)
+- **RTB Engine**: Go-based real-time bidding system with sub-10ms responses
+- **Analytics Service**: Advanced performance tracking and reporting
+- **Audio Processing**: Dynamic ad insertion capabilities with FFmpeg
+- **RSS Service**: Automated RSS feed generation with embedded ads
+- **Campaign Optimization**: Advanced targeting and bidding algorithms
 
 See our [Issues](../../issues) and [Projects](../../projects) for detailed development tracking.
 
@@ -326,5 +351,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Enterprise-grade podcast advertising platform** 🎙️  
-**Phase 1 Complete ✅ | Phase 2A Complete ✅ | RTB Engine Next 🔄**
+**Enterprise-grade two-sided podcast advertising marketplace** 🎙️  
+**Phase 1 ✅ | Phase 2A ✅ | Phase 2A.5 ✅ | RTB Engine Next 🚀**

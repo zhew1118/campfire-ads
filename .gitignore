@@ -204,3 +204,6 @@ strategy/
 *.internal.md
 planning/
 business/
+
+# Claude Code artifacts
+.claude/

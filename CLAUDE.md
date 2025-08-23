@@ -9,22 +9,49 @@ The stack.md file contains the full microservices architecture specification, se
 
 ## 🚨 **CRITICAL DEVELOPMENT RULE**
 
-**🔍 BEFORE WRITING ANY CODE - ALWAYS CHECK `common/` FOLDER FIRST!**
+**🔍 BEFORE WRITING ANY CODE - ALWAYS CHECK THESE IN ORDER:**
 
-1. **Check for existing utilities**: `common/middleware/`, `common/config/`, `common/types/`
-2. **Reuse shared components**: Authentication, validation, security, database connections
-3. **Follow established patterns**: TypeScript interfaces, error handling, logging
-4. **Extend existing code**: Don't duplicate functionality that already exists
-5. **Check imports**: See what other services are already using from common/
+### 1. **Check API Gateway Routes First** 📡
+- **ALWAYS examine `api-gateway/src/routes/` before building new services**
+- **Understand existing endpoints** - API Gateway may already proxy to your service
+- **Match expected API contracts** - Services must implement what Gateway expects
+- **Check service names** - HTTPClient uses specific service names for routing
+- **Review request/response patterns** - Follow established data flow
+
+### 2. **Check Common Folder** 📁
+- **Check for existing utilities**: `common/middleware/`, `common/config/`, `common/types/`
+- **Reuse shared components**: Authentication, validation, security, database connections
+- **Follow established patterns**: TypeScript interfaces, error handling, logging
+- **Extend existing code**: Don't duplicate functionality that already exists
+- **Check imports**: See what other services are already using from common/
 
 **The `common/` folder contains:**
 - 🛡️ **Security middleware** - Authentication, rate limiting, validation  
 - ⚙️ **Configuration utilities** - Environment-specific settings
 - 🔧 **Shared types** - TypeScript interfaces and schemas
-- 📊 **Database utilities** - Connection pooling, migrations (when added)
+- 📊 **Database utilities** - Connection pooling, migrations
 - 🚨 **Error handling** - Standardized error responses
 
-**This prevents code duplication and ensures consistent architecture across all services.**
+### 3. **Architecture Flow Understanding** 🏗️
+```
+Dashboard → API Gateway → Microservices → Database
+    ↓           ↓              ↓           ↓
+   React    Proxy/Auth     Business     PostgreSQL
+          Validation      Logic        Connection
+```
+
+### 4. **Consolidate Duplications** 🧹
+- **Check for duplicate files** - types, middleware, utilities across services
+- **Remove redundant code** - consolidate into common/ folder
+- **Update imports** - ensure all services use common utilities
+- **Test after cleanup** - verify services still compile and work
+
+**This prevents:**
+- ❌ Building services that don't match Gateway expectations
+- ❌ Code duplication across services  
+- ❌ Inconsistent API contracts
+- ❌ Missing authentication/security patterns
+- ❌ Maintenance nightmare from duplicate code
 
 ## 🔄 **DOCUMENTATION UPDATE RULE**
 
@@ -48,8 +75,9 @@ The stack.md file contains the full microservices architecture specification, se
 
 **This ensures documentation stays synchronized and Claude sessions have accurate context.**
 
-## 🎯 Current Status: **Phase 2A Complete + Production Ready** ✅
+## 🎯 Current Status: **Phase 2A.5 Complete + Business Logic Implemented** ✅
 
+### **Phase 2A Complete:**
 - ✅ **API Gateway**: Secure routing with enterprise middleware
 - ✅ **Authentication**: JWT + role-based access control  
 - ✅ **Rate Limiting**: Redis-powered (10k req/s RTB optimized)
@@ -62,9 +90,50 @@ The stack.md file contains the full microservices architecture specification, se
 - ✅ **Docker Production**: Full containerization with working builds
 - ✅ **Remote Deployment**: Ready for production deployment
 
-## 🚀 **Next Priority: Phase 2A.5 - Inventory Service Foundation** 🔄
+### **Phase 2A.5 Complete - Business Logic Implementation:**
+- ✅ **Production Authentication**: Database-connected auth with real user UUIDs
+- ✅ **Role-Based UI**: Different navigation for podcasters vs advertisers
+- ✅ **Supply-Side Flow**: Podcasters manage podcasts → episodes → ad slots
+- ✅ **Demand-Side Flow**: Advertisers browse inventory → create campaigns
+- ✅ **Inventory Service**: Working CRUD operations for podcasts
+- ✅ **Database Integration**: PostgreSQL with proper SSL configuration
+- ✅ **Business Logic Separation**: Two-sided marketplace correctly implemented
 
-**NEXT** (Phase 2A.5) - Build inventory management before RTB engine:
+## 🎯 **Business Flow Implementation** ✅
+
+### **Two-Sided Marketplace Correctly Implemented:**
+
+**🎙️ PODCASTERS (Supply Side)**
+```
+Login → My Podcasts → Episodes → Ad Slots → Set CPM Pricing
+```
+- **Role**: `podcaster`
+- **Navigation**: My Podcasts, Episodes, Ad Slots
+- **Purpose**: Create and manage their inventory (supply)
+- **Actions**: Add podcasts, create episodes, define ad slots, set floor pricing
+- **Login**: `test@example.com` / `password123` / `podcaster`
+
+**📢 ADVERTISERS (Demand Side)**  
+```
+Login → Browse Inventory → View Available Slots → Create Campaigns → Bid
+```
+- **Role**: `advertiser`  
+- **Navigation**: Browse Inventory, My Campaigns, Analytics
+- **Purpose**: Discover and purchase inventory (demand)
+- **Actions**: Browse podcasts, view available slots, create campaigns
+- **Login**: `advertiser@example.com` / `password123` / `advertiser`
+
+### **Key Business Logic Features:**
+- ✅ **Role-Based Navigation**: Different UI flows for supply vs demand
+- ✅ **Real Database Auth**: JWT tokens contain actual database UUIDs
+- ✅ **Supply Management**: Podcasters see their owned content only
+- ✅ **Demand Discovery**: Advertisers browse all available inventory
+- ✅ **Separation of Concerns**: Clear distinction between marketplace sides
+
+## 🚀 **Next Priority: Phase 2B - RTB Engine + Service Completion** 🔄
+
+**COMPLETED** Phase 2A.5 - Inventory Service Foundation ✅  
+**NEXT** (Phase 2B) - High-performance RTB engine:
 
 ### **Why Phase 2A.5 First?**
 - ✅ **Natural progression**: API Gateway → Real inventory → RTB bidding
@@ -411,11 +480,19 @@ cd common/middleware && npm test
 
 ---
 
-## 🚀 Phase 2A Complete - Dashboard Integration ✅
+## 🚀 Phase 2A.5 Complete - Business Logic Implementation ✅
 
-**COMPLETED**: Dashboard successfully connected to API Gateway  
-**CURRENT**: Complete end-to-end platform working with authentication  
-**NEXT**: Phase 2B - RTB Engine + Service Extraction  
+**COMPLETED**: Two-sided marketplace with role-based business logic
+**CURRENT**: Complete supply/demand platform with production authentication  
+**NEXT**: Phase 2B - RTB Engine + Service Completion
 **Architecture**: See [`stack.md`](./stack.md) for complete microservices roadmap
+
+### ✅ **Major Milestones Achieved:**
+- **Production Authentication**: Database-connected auth with real user UUIDs
+- **Two-Sided Marketplace**: Separate workflows for podcasters vs advertisers  
+- **Business Logic Implementation**: Supply-side and demand-side correctly separated
+- **Role-Based Navigation**: Different UI flows based on user role
+- **Inventory Service**: Working podcast/episode/ad slot management
+- **Complete Integration**: Dashboard ↔ API Gateway ↔ Database ↔ Services
 
 🔥🎙️ **Complete platform foundation ready - RTB engine next!**
