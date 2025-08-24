@@ -47,9 +47,24 @@ export const apiService = {
 
   // Podcasts
   getPodcasts: () => api.get('/podcasts?page=1&limit=20&sort=desc&sortBy=created_at'),
+  getPodcast: (id: string) => api.get(`/podcasts/${id}`),
   createPodcast: (data: any) => api.post('/podcasts', data),
   updatePodcast: (id: string, data: any) => api.put(`/podcasts/${id}`, data),
   deletePodcast: (id: string) => api.delete(`/podcasts/${id}`),
+
+  // Episodes
+  getEpisodes: (podcastId: string) => api.get(`/podcasts/${podcastId}/episodes?page=1&limit=20&sort=desc&sortBy=created_at`),
+  getEpisode: (episodeId: string) => api.get(`/episodes/${episodeId}`),
+  createEpisode: (podcastId: string, data: any) => api.post(`/podcasts/${podcastId}/episodes`, data),
+  updateEpisode: (episodeId: string, data: any) => api.put(`/episodes/${episodeId}`, data),
+  deleteEpisode: (episodeId: string) => api.delete(`/episodes/${episodeId}`),
+
+  // Ad Slots
+  getAdSlots: (episodeId: string) => api.get(`/episodes/${episodeId}/slots?page=1&limit=20&sort=desc&sortBy=created_at`),
+  getAdSlot: (slotId: string) => api.get(`/slots/${slotId}`),
+  createAdSlot: (episodeId: string, data: any) => api.post(`/episodes/${episodeId}/slots`, data),
+  updateAdSlot: (slotId: string, data: any) => api.put(`/slots/${slotId}`, data),
+  deleteAdSlot: (slotId: string) => api.delete(`/slots/${slotId}`),
 
   // Advertisers
   getAdvertisers: () => api.get('/advertisers'),

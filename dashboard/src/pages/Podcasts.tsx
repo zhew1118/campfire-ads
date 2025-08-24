@@ -1,11 +1,15 @@
-import { PlusIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MicrophoneIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import { apiService } from '../services/api';
+import PodcastModal from '../components/PodcastModal';
 
 const Podcasts: React.FC = () => {
   const [apiStatus, setApiStatus] = useState<string>('Testing API connection...');
   const [podcasts, setPodcasts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingPodcast, setEditingPodcast] = useState<any>(null);
+  const [deletingPodcast, setDeletingPodcast] = useState<any>(null);
 
   // Load podcaster's podcasts (Supply Side Management)
   useEffect(() => {
@@ -31,6 +35,41 @@ const Podcasts: React.FC = () => {
     loadPodcasts();
   }, []);
 
+  const handleSavePodcast = async (podcastData: any) => {
+    try {
+      if (podcastData.id) {
+        // Update existing podcast
+        await apiService.updatePodcast(podcastData.id, podcastData);
+        setApiStatus(`✅ Successfully updated podcast "${podcastData.name}"!`);
+      } else {
+        // Create new podcast
+        await apiService.createPodcast(podcastData);
+        setApiStatus(`✅ Successfully created podcast "${podcastData.name}"!`);
+      }
+      
+      // Reload podcasts to reflect changes
+      const updatedResponse = await apiService.getPodcasts();
+      if (updatedResponse.data?.data?.podcasts) {
+        setPodcasts(updatedResponse.data.data.podcasts);
+      }
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to save podcast');
+    }
+  };
+
+  const handleDeletePodcast = async (podcast: any) => {
+    try {
+      await apiService.deletePodcast(podcast.id);
+      setApiStatus(`✅ Successfully deleted podcast "${podcast.name}"`);
+      
+      // Remove from local state
+      setPodcasts(podcasts.filter((p: any) => p.id !== podcast.id));
+      setDeletingPodcast(null);
+    } catch (error: any) {
+      setApiStatus(`❌ Error deleting podcast: ${error.response?.data?.error || error.message}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -39,7 +78,10 @@ const Podcasts: React.FC = () => {
           <p className="text-gray-600">Manage your podcast inventory and ad slots (Supply Side)</p>
           <p className="text-sm mt-2">{apiStatus}</p>
         </div>
-        <button className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+        >
           <PlusIcon className="w-5 h-5 mr-2" />
           Add Podcast
         </button>
@@ -120,14 +162,22 @@ const Podcasts: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button 
+                        onClick={() => setEditingPodcast(podcast)}
+                        className="text-blue-600 hover:text-blue-900 mr-3 flex items-center"
+                      >
+                        <PencilIcon className="h-4 w-4 mr-1" />
+                        Edit
+                      </button>
                       <button className="text-primary-600 hover:text-primary-900 mr-3">
-                        Manage Episodes
+                        Episodes
                       </button>
-                      <button className="text-blue-600 hover:text-blue-900 mr-3">
-                        Ad Slots
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-900">
-                        Settings
+                      <button 
+                        onClick={() => setDeletingPodcast(podcast)}
+                        className="text-red-600 hover:text-red-900 flex items-center"
+                      >
+                        <TrashIcon className="h-4 w-4 mr-1" />
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -195,6 +245,47 @@ const Podcasts: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Create/Edit Podcast Modal */}
+      <PodcastModal
+        isOpen={showCreateModal || editingPodcast !== null}
+        onClose={() => {
+          setShowCreateModal(false);
+          setEditingPodcast(null);
+        }}
+        podcast={editingPodcast}
+        onSave={handleSavePodcast}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {deletingPodcast && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Delete Podcast
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Are you sure you want to delete "{deletingPodcast.name}"? This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setDeletingPodcast(null)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleDeletePodcast(deletingPodcast)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
