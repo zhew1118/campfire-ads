@@ -57,7 +57,7 @@ export class PodcasterService {
           COUNT(DISTINCT e.id) as total_episodes,
           COALESCE(SUM(b.cpm_price * CASE WHEN b.status = 'delivered' THEN 1 ELSE 0 END), 0) as total_earnings_cents
         FROM users u
-        LEFT JOIN podcasts p ON u.id = p.owner_id
+        LEFT JOIN podcasts p ON u.id = p.podcaster_id
         LEFT JOIN episodes e ON p.id = e.podcast_id
         LEFT JOIN ad_slots a ON e.id = a.episode_id  
         LEFT JOIN bookings b ON a.id = b.ad_slot_id
@@ -175,14 +175,14 @@ export class PodcasterService {
           FROM podcasts p
           LEFT JOIN episodes e ON p.id = e.podcast_id
           LEFT JOIN ad_slots a ON e.id = a.episode_id
-          WHERE p.owner_id = $1
+          WHERE p.podcaster_id = $1
           GROUP BY p.id
           ORDER BY p.created_at DESC
           LIMIT $2 OFFSET $3
         `, [podcasterId, limit, offset]),
         
         query(`
-          SELECT COUNT(*) FROM podcasts WHERE owner_id = $1
+          SELECT COUNT(*) FROM podcasts WHERE podcaster_id = $1
         `, [podcasterId])
       ]);
 

@@ -83,7 +83,7 @@ export class InventoryService {
           FROM ad_slots a
           JOIN episodes e ON a.episode_id = e.id
           JOIN podcasts p ON e.podcast_id = p.id
-          JOIN users u ON p.owner_id = u.id
+          JOIN users u ON p.podcaster_id = u.id
           ${whereClause}
           ORDER BY a.created_at DESC
           LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
@@ -175,7 +175,7 @@ export class InventoryService {
           FROM ad_slots a
           JOIN episodes e ON a.episode_id = e.id
           JOIN podcasts p ON e.podcast_id = p.id
-          JOIN users u ON p.owner_id = u.id
+          JOIN users u ON p.podcaster_id = u.id
           ${whereClause}
           ORDER BY a.created_at DESC
           LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
@@ -217,7 +217,7 @@ export class InventoryService {
         FROM ad_slots a
         JOIN episodes e ON a.episode_id = e.id
         JOIN podcasts p ON e.podcast_id = p.id
-        JOIN users u ON p.owner_id = u.id
+        JOIN users u ON p.podcaster_id = u.id
         WHERE a.id = $1
       `, [slotId]);
 

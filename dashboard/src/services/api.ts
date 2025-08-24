@@ -80,6 +80,7 @@ export const apiService = {
 
   // Inventory
   getInventory: () => api.get('/inventory'),
+  searchInventory: (queryParams: string) => api.get(`/inventory/search?${queryParams}`),
   createInventory: (data: any) => api.post('/inventory', data),
   updateInventory: (id: string, data: any) => api.put(`/inventory/${id}`, data),
   deleteInventory: (id: string) => api.delete(`/inventory/${id}`),

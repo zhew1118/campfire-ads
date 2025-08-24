@@ -240,7 +240,7 @@ The API Gateway provides unified access to all microservices with enterprise sec
 - **`/api/podcasts`** - Podcast CRUD operations for podcasters (JWT protected)
 - **`/api/podcasts/:id/episodes`** - Episode management (JWT protected)  
 - **`/api/episodes/:id/slots`** - Ad slot configuration with CPM pricing (JWT protected)
-- **`/api/inventory/available`** - Browse available inventory for advertisers (JWT protected)
+- **`/api/inventory/search`** - Search-based inventory discovery with filters (JWT protected)
 - **`/api/campaigns`** - Campaign management for advertisers (JWT protected)
 - **`/api/ads`** - Real-time bidding + tracking (API key protected, Phase 2B)
 - **`/api/analytics`** - Event tracking + reports (public with validation, Phase 2B)

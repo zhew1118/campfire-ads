@@ -59,6 +59,37 @@ router.get('/',
   })
 );
 
+// GET /inventory/available - Get available inventory for browsing (alias for main route)
+router.get('/available', 
+  validators.pagination,
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
+    const { page = 1, limit = 20 } = req.query as any;
+    
+    // Import services here to avoid circular dependencies
+    const { PodcastService } = require('../services/podcastService');
+    const podcastService = new PodcastService();
+    
+    // Get all podcasts from all users (no user filter for browsing)
+    const result = await podcastService.getAllPodcasts(page, limit);
+    
+    const response: APIResponse = {
+      status: 'success',
+      timestamp: new Date().toISOString(),
+      data: {
+        podcasts: result.podcasts,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit)
+        }
+      }
+    };
+    
+    res.json(response);
+  })
+);
+
 // GET /inventory/search - Search inventory with more advanced filters
 router.get('/search',
   asyncHandler(async (req: AuthenticatedRequest, res) => {

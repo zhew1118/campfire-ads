@@ -9,6 +9,7 @@ import {
   CurrencyDollarIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
+import AvailableInventoryPreview from '../components/AvailableInventoryPreview';
 
 // Sample data for charts
 const revenueData = [
@@ -408,62 +409,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Available Inventory Preview */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Available Inventory</h3>
-          <Link to="/inventory" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-            View All →
-          </Link>
-        </div>
-        <div className="overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Podcast
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Available Slots
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  CPM Range
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">Tech Talk Daily</div>
-                  <div className="text-sm text-gray-500">The Future of AI</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                    Technology
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2 slots</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">$2.50-$3.00</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">Morning Coffee Chat</div>
-                  <div className="text-sm text-gray-500">Daily conversations</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                    Lifestyle
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">No episodes yet</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AvailableInventoryPreview />
     </div>
   );
 };

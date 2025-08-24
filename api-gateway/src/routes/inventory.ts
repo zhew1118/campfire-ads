@@ -67,6 +67,19 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   }
 });
 
+router.get('/available', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const response = await inventoryService.get('/inventory/available', {
+      params: req.query
+    });
+    res.json(response.data);
+  } catch (error: any) {
+    res.status(error.response?.status || 500).json({
+      error: error.response?.data?.message || 'Failed to fetch available inventory'
+    });
+  }
+});
+
 router.get('/search', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.get('/inventory/search', {
