@@ -12,7 +12,8 @@ interface Campaign {
   status: 'draft' | 'active' | 'paused' | 'completed';
   start_date: string;
   end_date: string;
-  targeting_criteria: {
+  target_categories?: string[];
+  targeting_criteria?: {
     categories: string[];
     min_cpm: number;
     max_cpm: number;
@@ -249,7 +250,7 @@ const Campaigns: React.FC = () => {
                       {campaign.target_demographic}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {campaign.targeting_criteria.categories.join(', ') || 'All'}
+                      {campaign.target_categories?.join(', ') || 'All'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(campaign.status)}`}>

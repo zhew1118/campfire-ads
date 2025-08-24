@@ -125,6 +125,6 @@ INSERT INTO ad_slots (id, episode_id, position, duration, cpm_floor) VALUES
     ('880e8400-e29b-41d4-a716-446655440002', '770e8400-e29b-41d4-a716-446655440001', 'pre_roll', 30, 200)
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO campaigns (id, advertiser_id, name, description, budget, max_cpm, status) VALUES
-    ('990e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440001', 'Q4 Tech Product Launch', 'Promoting our latest tech product', 5000000, 350, 'active')
+INSERT INTO campaigns (id, advertiser_id, name, description, budget, max_cpm, target_categories, start_date, end_date, status) VALUES
+    ('990e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440001', 'Q4 Tech Product Launch', 'Promoting our latest tech product', 5000000, 350, ARRAY['Technology', 'Business'], '2024-10-01', '2024-12-31', 'active')
 ON CONFLICT (id) DO NOTHING;

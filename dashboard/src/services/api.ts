@@ -73,7 +73,7 @@ export const apiService = {
   deleteAdvertiser: (id: string) => api.delete(`/advertisers/${id}`),
 
   // Campaigns
-  getCampaigns: () => api.get('/campaigns'),
+  getCampaigns: (page = 1, limit = 20) => api.get(`/campaigns?page=${page}&limit=${limit}&sort=desc&sortBy=created_at`),
   createCampaign: (data: any) => api.post('/campaigns', data),
   updateCampaign: (id: string, data: any) => api.put(`/campaigns/${id}`, data),
   deleteCampaign: (id: string) => api.delete(`/campaigns/${id}`),

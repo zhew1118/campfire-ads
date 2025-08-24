@@ -46,7 +46,7 @@ export class CampaignService {
       let countParams: any[] = [];
       
       if (userRole === 'advertiser') {
-        whereClause = 'WHERE advertiser_id = $3';
+        whereClause = 'WHERE c.advertiser_id = $3';
         params.push(userId);
         countParams = [userId];
       } else if (userRole !== 'admin') {
@@ -67,7 +67,7 @@ export class CampaignService {
         `, params),
         
         query(`
-          SELECT COUNT(*) FROM campaigns c ${whereClause}
+          SELECT COUNT(*) FROM campaigns c ${whereClause.replace('$3', '$1')}
         `, countParams)
       ]);
 

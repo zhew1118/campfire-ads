@@ -9,7 +9,7 @@ const rtbService = new HTTPClient('rtb');
 router.get('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.get('/campaigns', {
-      params: { ...req.query, user_id: req.user?.id }
+      params: { ...req.query, user_id: req.user?.id, user_role: req.user?.role }
     });
     res.json(response.data);
   } catch (error: any) {

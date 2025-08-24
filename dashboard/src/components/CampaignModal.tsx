@@ -10,7 +10,8 @@ interface Campaign {
   status: 'draft' | 'active' | 'paused' | 'completed';
   start_date: string;
   end_date: string;
-  targeting_criteria: {
+  target_categories?: string[];
+  targeting_criteria?: {
     categories: string[];
     min_cpm: number;
     max_cpm: number;
