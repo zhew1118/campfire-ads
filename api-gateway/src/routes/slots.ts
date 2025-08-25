@@ -7,7 +7,11 @@ const inventoryService = new HTTPClient('inventory');
 
 router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.get(`/slots/${req.params.id}`);
+    const response = await inventoryService.get(`/slots/${req.params.id}`, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -18,7 +22,11 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.put('/:id/pricing', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.put(`/slots/${req.params.id}/pricing`, req.body);
+    const response = await inventoryService.put(`/slots/${req.params.id}/pricing`, req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -29,7 +37,11 @@ router.put('/:id/pricing', async (req: AuthenticatedRequest, res: Response) => {
 
 router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.put(`/slots/${req.params.id}`, req.body);
+    const response = await inventoryService.put(`/slots/${req.params.id}`, req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -40,7 +52,11 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    await inventoryService.delete(`/slots/${req.params.id}`);
+    await inventoryService.delete(`/slots/${req.params.id}`, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.status(204).send();
   } catch (error: any) {
     res.status(error.response?.status || 500).json({

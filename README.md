@@ -219,6 +219,7 @@ chmod +x scripts/setup.sh
 - **TypeScript Consistency**: Resolved Campaign interface conflicts across components ✅
 - **Database Integration**: Working campaigns with proper date fields and categories ✅
 - **End-to-End Testing**: Manual verification confirms full campaigns functionality ✅
+- **Ad Slots Authentication**: Fixed header forwarding in API Gateway slots routes ✅
 
 ### Phase 2B Next (RTB Engine + Service Completion) 🔄  
 - **RTB Engine**: Go-based real-time bidding engine for sub-10ms responses
@@ -325,7 +326,7 @@ docker-compose down
 - ✅ **Security Hardening**: Fixed auth context vulnerabilities - removed user_id parameter access
 - ✅ **RTB Foundation**: Slot reservation system with 60-second holds - production ready
 - ✅ **RTB Testing**: Floor price validation, role-based auth, concurrent bidding verified
-- ✅ **API Gateway**: Fixed header forwarding issue for proper JWT authentication
+- ✅ **API Gateway**: Fixed header forwarding issues for proper JWT authentication (slots, episodes)
 - ✅ **Inventory Service**: Working podcast/episode/ad slot management
 - ✅ **Campaign Service**: Fixed API with pagination, proper SQL queries, database integration
 - ✅ **Role-Based UI**: Supply-side (podcasters) and demand-side (advertisers) workflows

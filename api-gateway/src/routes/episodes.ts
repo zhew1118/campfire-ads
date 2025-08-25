@@ -41,7 +41,10 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.get('/:id/slots', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.get(`/episodes/${req.params.id}/slots`, {
-      params: req.query
+      params: req.query,
+      headers: {
+        'Authorization': req.headers.authorization
+      }
     });
     res.json(response.data);
   } catch (error: any) {
@@ -53,7 +56,11 @@ router.get('/:id/slots', async (req: AuthenticatedRequest, res: Response) => {
 
 router.post('/:id/slots', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.post(`/episodes/${req.params.id}/slots`, req.body);
+    const response = await inventoryService.post(`/episodes/${req.params.id}/slots`, req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.status(201).json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
