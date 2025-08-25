@@ -106,25 +106,61 @@ CREATE INDEX IF NOT EXISTS idx_bookings_ad_slot_id ON bookings(ad_slot_id);
 -- Insert sample data for testing
 INSERT INTO users (id, email, password_hash, role, first_name, last_name, company_name) VALUES
     ('550e8400-e29b-41d4-a716-446655440000', 'test@example.com', '$2b$10$eJ/aWQQyZe8F9kqFQqQvv.Q7KRKDQOjYqZJQJhYGZvVF7W8zRQvV.', 'podcaster', 'John', 'Doe', 'Podcast Studio'),
-    ('550e8400-e29b-41d4-a716-446655440001', 'advertiser@example.com', '$2b$10$eJ/aWQQyZe8F9kqFQqQvv.Q7KRKDQOjYqZJQJhYGZvVF7W8zRQvV.', 'advertiser', 'Jane', 'Smith', 'TechCorp')
+    ('550e8400-e29b-41d4-a716-446655440001', 'advertiser@example.com', '$2b$10$eJ/aWQQyZe8F9kqFQqQvv.Q7KRKDQOjYqZJQJhYGZvVF7W8zRQvV.', 'advertiser', 'Jane', 'Smith', 'TechCorp'),
+    ('550e8400-e29b-41d4-a716-446655440002', 'podcaster2@example.com', '$2b$10$eJ/aWQQyZe8F9kqFQqQvv.Q7KRKDQOjYqZJQJhYGZvVF7W8zRQvV.', 'podcaster', 'Sarah', 'Williams', 'Creative Audio Lab'),
+    ('550e8400-e29b-41d4-a716-446655440003', 'advertiser2@example.com', '$2b$10$eJ/aWQQyZe8F9kqFQqQvv.Q7KRKDQOjYqZJQJhYGZvVF7W8zRQvV.', 'advertiser', 'Mike', 'Johnson', 'AdTech Solutions')
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO podcasts (id, name, description, category, podcaster_id) VALUES
     ('660e8400-e29b-41d4-a716-446655440000', 'Tech Talk Daily', 'Daily discussions about the latest in technology', 'Technology', '550e8400-e29b-41d4-a716-446655440000'),
-    ('660e8400-e29b-41d4-a716-446655440001', 'Morning Coffee Chat', 'Casual morning conversations', 'Lifestyle', '550e8400-e29b-41d4-a716-446655440000')
+    ('660e8400-e29b-41d4-a716-446655440001', 'Morning Coffee Chat', 'Casual morning conversations', 'Lifestyle', '550e8400-e29b-41d4-a716-446655440000'),
+    ('660e8400-e29b-41d4-a716-446655440002', 'Business Mindset Weekly', 'Weekly insights on entrepreneurship and business strategy', 'Business', '550e8400-e29b-41d4-a716-446655440002'),
+    ('660e8400-e29b-41d4-a716-446655440003', 'Creative Chronicles', 'Conversations with artists, designers, and creators', 'Arts', '550e8400-e29b-41d4-a716-446655440002')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO episodes (id, podcast_id, title, description, duration, audio_url, status) VALUES
     ('770e8400-e29b-41d4-a716-446655440000', '660e8400-e29b-41d4-a716-446655440000', 'The Future of AI', 'Exploring artificial intelligence trends', 1800, 'https://example.com/audio/ai-episode.mp3', 'published'),
-    ('770e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Weekend Plans', 'Discussing weekend activities', 1200, 'https://example.com/audio/weekend-episode.mp3', 'published')
+    ('770e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Weekend Plans', 'Discussing weekend activities', 1200, 'https://example.com/audio/weekend-episode.mp3', 'published'),
+    ('770e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440002', 'Startup Success Stories', 'Interviews with successful entrepreneurs', 2400, 'https://example.com/audio/startup-episode.mp3', 'published'),
+    ('770e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440003', 'Designer Spotlight', 'Featuring emerging design talents', 1600, 'https://example.com/audio/design-episode.mp3', 'published')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO ad_slots (id, episode_id, position, duration, cpm_floor) VALUES
     ('880e8400-e29b-41d4-a716-446655440000', '770e8400-e29b-41d4-a716-446655440000', 'pre_roll', 30, 250),
     ('880e8400-e29b-41d4-a716-446655440001', '770e8400-e29b-41d4-a716-446655440000', 'mid_roll', 60, 300),
-    ('880e8400-e29b-41d4-a716-446655440002', '770e8400-e29b-41d4-a716-446655440001', 'pre_roll', 30, 200)
+    ('880e8400-e29b-41d4-a716-446655440002', '770e8400-e29b-41d4-a716-446655440001', 'pre_roll', 30, 200),
+    ('880e8400-e29b-41d4-a716-446655440003', '770e8400-e29b-41d4-a716-446655440002', 'pre_roll', 30, 400),
+    ('880e8400-e29b-41d4-a716-446655440004', '770e8400-e29b-41d4-a716-446655440002', 'mid_roll', 45, 450),
+    ('880e8400-e29b-41d4-a716-446655440005', '770e8400-e29b-41d4-a716-446655440003', 'pre_roll', 30, 350),
+    ('880e8400-e29b-41d4-a716-446655440006', '770e8400-e29b-41d4-a716-446655440003', 'post_roll', 15, 300)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO campaigns (id, advertiser_id, name, description, budget, max_cpm, target_categories, start_date, end_date, status) VALUES
-    ('990e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440001', 'Q4 Tech Product Launch', 'Promoting our latest tech product', 5000000, 350, ARRAY['Technology', 'Business'], '2024-10-01', '2024-12-31', 'active')
+    ('990e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440001', 'Q4 Tech Product Launch', 'Promoting our latest tech product', 5000000, 350, ARRAY['Technology', 'Business'], '2024-10-01', '2024-12-31', 'active'),
+    ('990e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440003', 'Creative Brand Awareness', 'Building brand awareness through creative content', 3000000, 500, ARRAY['Arts', 'Lifestyle'], '2024-11-01', '2024-12-31', 'active')
 ON CONFLICT (id) DO NOTHING;
+
+-- Add slot reservations table for RTB functionality
+CREATE TABLE IF NOT EXISTS slot_reservations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    ad_slot_id UUID NOT NULL REFERENCES ad_slots(id) ON DELETE CASCADE,
+    campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    advertiser_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    bid_cpm BIGINT NOT NULL, -- store in micros (e.g. 1000000 = $1.00 CPM)
+    status VARCHAR(20) NOT NULL CHECK (status IN ('reserved','confirmed','expired','released')),
+    expires_at TIMESTAMPTZ NOT NULL,
+    reserved_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    confirmed_at TIMESTAMPTZ
+);
+
+-- Only one confirmed reservation per slot
+CREATE UNIQUE INDEX unique_confirmed_reservation
+ON slot_reservations(ad_slot_id)
+WHERE status = 'confirmed';
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_slot_reservations_ad_slot_id ON slot_reservations(ad_slot_id);
+CREATE INDEX IF NOT EXISTS idx_slot_reservations_campaign_id ON slot_reservations(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_slot_reservations_advertiser_id ON slot_reservations(advertiser_id);
+CREATE INDEX IF NOT EXISTS idx_slot_reservations_expires_at ON slot_reservations(expires_at);
+CREATE INDEX IF NOT EXISTS idx_slot_reservations_status ON slot_reservations(status);

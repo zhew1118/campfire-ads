@@ -9,7 +9,6 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const queryParams = {
       ...req.query,
-      user_id: req.user?.id,
       page: req.query.page || 1,
       limit: req.query.limit || 20,
       sort: req.query.sort || 'desc',
@@ -17,7 +16,10 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
     };
     
     const response = await inventoryService.get('/podcasts', {
-      params: queryParams
+      params: queryParams,
+      headers: {
+        'Authorization': req.headers.authorization
+      }
     });
     res.json(response.data);
   } catch (error: any) {
@@ -29,7 +31,11 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 
 router.post('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.post('/podcasts', req.body);
+    const response = await inventoryService.post('/podcasts', req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.status(201).json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -40,7 +46,11 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
 
 router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.get(`/podcasts/${req.params.id}`);
+    const response = await inventoryService.get(`/podcasts/${req.params.id}`, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -51,7 +61,11 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.put(`/podcasts/${req.params.id}`, req.body);
+    const response = await inventoryService.put(`/podcasts/${req.params.id}`, req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -62,7 +76,11 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    await inventoryService.delete(`/podcasts/${req.params.id}`);
+    await inventoryService.delete(`/podcasts/${req.params.id}`, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.status(204).send();
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -74,7 +92,10 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.get('/:id/episodes', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.get(`/podcasts/${req.params.id}/episodes`, {
-      params: req.query
+      params: req.query,
+      headers: {
+        'Authorization': req.headers.authorization
+      }
     });
     res.json(response.data);
   } catch (error: any) {
@@ -86,7 +107,11 @@ router.get('/:id/episodes', async (req: AuthenticatedRequest, res: Response) => 
 
 router.post('/:id/episodes', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.post(`/podcasts/${req.params.id}/episodes`, req.body);
+    const response = await inventoryService.post(`/podcasts/${req.params.id}/episodes`, req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.status(201).json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({

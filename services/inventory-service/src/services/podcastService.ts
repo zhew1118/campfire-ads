@@ -89,6 +89,7 @@ export class PodcastService {
       let queryStr = 'SELECT * FROM podcasts WHERE id = $1';
       let params = [id];
       
+      // For authenticated requests, always enforce ownership
       if (userId) {
         queryStr += ' AND podcaster_id = $2';
         params.push(userId);
@@ -96,6 +97,16 @@ export class PodcastService {
       
       const result = await query(queryStr, params);
 
+      return result.rows[0] || null;
+    } catch (error: any) {
+      throw new DatabaseError('Failed to fetch podcast', error.code);
+    }
+  }
+
+  // Public method for browsing (no ownership check)
+  async getPodcastByIdPublic(id: string): Promise<Podcast | null> {
+    try {
+      const result = await query('SELECT * FROM podcasts WHERE id = $1 AND status = $2', [id, 'active']);
       return result.rows[0] || null;
     } catch (error: any) {
       throw new DatabaseError('Failed to fetch podcast', error.code);

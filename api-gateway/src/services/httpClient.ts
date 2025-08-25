@@ -41,18 +41,42 @@ export class HTTPClient {
   }
   
   async get(url: string, config?: AxiosRequestConfig) {
-    return this.client.get(url, config);
+    const finalConfig = {
+      ...config,
+      headers: {
+        ...config?.headers
+      }
+    };
+    return this.client.get(url, finalConfig);
   }
   
   async post(url: string, data?: any, config?: AxiosRequestConfig) {
-    return this.client.post(url, data, config);
+    const finalConfig = {
+      ...config,
+      headers: {
+        ...config?.headers
+      }
+    };
+    return this.client.post(url, data, finalConfig);
   }
   
   async put(url: string, data?: any, config?: AxiosRequestConfig) {
-    return this.client.put(url, data, config);
+    const finalConfig = {
+      ...config,
+      headers: {
+        ...config?.headers
+      }
+    };
+    return this.client.put(url, data, finalConfig);
   }
   
   async delete(url: string, config?: AxiosRequestConfig) {
-    return this.client.delete(url, config);
+    const finalConfig = {
+      ...config,
+      headers: {
+        ...config?.headers
+      }
+    };
+    return this.client.delete(url, finalConfig);
   }
 }

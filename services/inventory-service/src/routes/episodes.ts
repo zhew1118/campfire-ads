@@ -44,10 +44,10 @@ router.put('/:id',
     body: commonSchemas.episode.update
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const episode = await episodeService.updateEpisode(req.params.id, userId, req.body);
@@ -70,10 +70,10 @@ router.put('/:id',
 router.delete('/:id',
   validators.validateId('id'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const deleted = await episodeService.deleteEpisode(req.params.id, userId);
@@ -113,10 +113,10 @@ router.post('/:id/slots',
     body: commonSchemas.adSlot.create
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const slot = await adSlotService.createAdSlot(req.params.id, userId, req.body);

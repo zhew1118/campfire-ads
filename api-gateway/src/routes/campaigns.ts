@@ -9,7 +9,10 @@ const rtbService = new HTTPClient('rtb');
 router.get('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.get('/campaigns', {
-      params: { ...req.query, user_id: req.user?.id, user_role: req.user?.role }
+      params: req.query,
+      headers: {
+        'Authorization': req.headers.authorization
+      }
     });
     res.json(response.data);
   } catch (error: any) {
@@ -21,13 +24,11 @@ router.get('/', async (req: AuthenticatedRequest, res: Response) => {
 
 router.post('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const campaignData = {
-      ...req.body,
-      created_by: req.user?.id,
-      user_role: req.user?.role
-    };
-    
-    const response = await inventoryService.post('/campaigns', campaignData);
+    const response = await inventoryService.post('/campaigns', req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     
     if (response.data.id) {
       try {
@@ -51,7 +52,11 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
 
 router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.get(`/campaigns/${req.params.id}`);
+    const response = await inventoryService.get(`/campaigns/${req.params.id}`, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     res.json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
@@ -62,7 +67,11 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.put(`/campaigns/${req.params.id}`, req.body);
+    const response = await inventoryService.put(`/campaigns/${req.params.id}`, req.body, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     
     if (req.body.targeting || req.body.budget) {
       try {
@@ -85,7 +94,11 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    await inventoryService.delete(`/campaigns/${req.params.id}`);
+    await inventoryService.delete(`/campaigns/${req.params.id}`, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     
     try {
       await rtbService.delete(`/campaigns/${req.params.id}`);
@@ -103,7 +116,11 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
 
 router.post('/:id/activate', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.post(`/campaigns/${req.params.id}/activate`);
+    const response = await inventoryService.post(`/campaigns/${req.params.id}/activate`, {}, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     
     try {
       await rtbService.post(`/campaigns/${req.params.id}/activate`);
@@ -121,7 +138,11 @@ router.post('/:id/activate', async (req: AuthenticatedRequest, res: Response) =>
 
 router.post('/:id/pause', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const response = await inventoryService.post(`/campaigns/${req.params.id}/pause`);
+    const response = await inventoryService.post(`/campaigns/${req.params.id}/pause`, {}, {
+      headers: {
+        'Authorization': req.headers.authorization
+      }
+    });
     
     try {
       await rtbService.post(`/campaigns/${req.params.id}/pause`);

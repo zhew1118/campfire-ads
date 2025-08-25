@@ -166,10 +166,10 @@ router.post('/:id/reserve',
     })
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.body.reserved_by || req.user?.id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const reservation = await inventoryService.reserveSlot(

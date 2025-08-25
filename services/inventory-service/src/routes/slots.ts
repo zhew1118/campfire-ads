@@ -42,10 +42,10 @@ router.put('/:id',
     body: commonSchemas.adSlot.update
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const slot = await adSlotService.updateAdSlot(req.params.id, userId, req.body);
@@ -71,10 +71,10 @@ router.put('/:id/pricing',
     body: commonSchemas.adSlot.pricing
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const slot = await adSlotService.updatePricing(req.params.id, userId, req.body);
@@ -97,10 +97,10 @@ router.put('/:id/pricing',
 router.delete('/:id',
   validators.validateId('id'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const deleted = await adSlotService.deleteAdSlot(req.params.id, userId);

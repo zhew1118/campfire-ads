@@ -10,6 +10,7 @@ import { podcasterRoutes } from './routes/podcasters';
 import { podcastRoutes } from './routes/podcasts';
 import { episodeRoutes } from './routes/episodes';
 import { adSlotRoutes } from './routes/slots';
+import { reservationRoutes } from './routes/reservations';
 
 dotenv.config();
 
@@ -53,12 +54,13 @@ app.get('/health', (req, res) => {
 });
 
 // API routes - matches what API Gateway expects
-app.use('/inventory', inventoryRoutes); // Browse available ad slots
-app.use('/campaigns', campaignRoutes); // Campaign management backend
-app.use('/podcasters', podcasterRoutes); // Podcaster management backend
-app.use('/podcasts', podcastRoutes); // Podcast management backend
-app.use('/episodes', episodeRoutes); // Episode management backend
-app.use('/slots', adSlotRoutes); // Ad slot management backend
+app.use('/inventory', inventoryRoutes); // Browse available ad slots (mixed public/private)
+app.use('/campaigns', authMiddleware.validateJWT, campaignRoutes); // Campaign management backend - JWT required
+app.use('/podcasters', podcasterRoutes); // Podcaster management backend - mixed auth
+app.use('/podcasts', authMiddleware.validateJWT, podcastRoutes); // Podcast management backend - JWT required
+app.use('/episodes', authMiddleware.validateJWT, episodeRoutes); // Episode management backend - JWT required
+app.use('/slots', authMiddleware.validateJWT, adSlotRoutes); // Ad slot management backend - JWT required
+app.use('/reservations', reservationRoutes); // RTB reservation system - mixed auth (some endpoints public)
 
 // 404 handler
 app.use(notFoundHandler);

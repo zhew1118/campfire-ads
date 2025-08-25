@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { 
   AuthenticatedRequest, 
   createValidator, 
+  createAuthMiddleware,
   commonSchemas,
   validators,
   asyncHandler,
@@ -13,6 +14,9 @@ import { EpisodeService } from '../services/episodeService';
 
 const router = Router();
 const validator = createValidator();
+const authMiddleware = createAuthMiddleware({
+  secret: process.env.JWT_SECRET || 'development-jwt-secret-key'
+});
 const podcastService = new PodcastService();
 const episodeService = new EpisodeService();
 
@@ -20,13 +24,10 @@ const episodeService = new EpisodeService();
 router.get('/', 
   validators.pagination,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    console.log('DEBUG - Query:', req.query);
-    console.log('DEBUG - User:', req.user);
-    const userId = req.query.user_id as string || req.user?.id;
-    console.log('DEBUG - userId:', userId);
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const { page = 1, limit = 20 } = req.query as any;
@@ -52,14 +53,15 @@ router.get('/',
 
 // POST /podcasts - Create a new podcast
 router.post('/',
+  authMiddleware.requireRole(['podcaster', 'admin']),
   validator.validate({
     body: commonSchemas.podcast.create
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.body.created_by || req.user?.id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const podcast = await podcastService.createPodcast(userId, req.body);
@@ -102,10 +104,10 @@ router.put('/:id',
     body: commonSchemas.podcast.update
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const podcast = await podcastService.updatePodcast(req.params.id, userId, req.body);
@@ -128,10 +130,10 @@ router.put('/:id',
 router.delete('/:id',
   validators.validateId('id'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const deleted = await podcastService.deletePodcast(req.params.id, userId);
@@ -179,10 +181,10 @@ router.post('/:id/episodes',
     body: commonSchemas.episode.create
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.id;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const episode = await episodeService.createEpisode(req.params.id, userId, req.body);

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { 
   AuthenticatedRequest, 
   createValidator, 
+  createAuthMiddleware,
   commonSchemas,
   validators,
   asyncHandler,
@@ -13,17 +14,20 @@ import { CampaignService } from '../services/campaignService';
 
 const router = Router();
 const validator = createValidator();
+const authMiddleware = createAuthMiddleware({
+  secret: process.env.JWT_SECRET || 'development-jwt-secret-key'
+});
 const campaignService = new CampaignService();
 
 // GET /campaigns - Get campaigns for user
 router.get('/', 
   validators.pagination,
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.query.user_id as string || req.user?.id;
-    const userRole = req.query.user_role as string || req.user?.role || 'advertiser';
+    const userId = req.user?.id;
+    const userRole = req.user?.role || 'advertiser';
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const { page = 1, limit = 20 } = req.query as any;
@@ -49,15 +53,16 @@ router.get('/',
 
 // POST /campaigns - Create a new campaign
 router.post('/',
+  authMiddleware.requireRole(['advertiser', 'admin']),
   validator.validate({
     body: commonSchemas.campaign.create
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.body.created_by || req.user?.id;
-    const userRole = req.body.user_role || req.user?.role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const campaign = await campaignService.createCampaign(userId, userRole, req.body);
@@ -102,11 +107,11 @@ router.put('/:id',
     body: commonSchemas.campaign.update
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
-    const userRole = req.user?.role || req.body.user_role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const campaign = await campaignService.updateCampaign(req.params.id, userId, userRole, req.body);
@@ -129,11 +134,11 @@ router.put('/:id',
 router.delete('/:id',
   validators.validateId('id'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
-    const userRole = req.user?.role || req.body.user_role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const deleted = await campaignService.deleteCampaign(req.params.id, userId, userRole);
@@ -150,11 +155,11 @@ router.delete('/:id',
 router.post('/:id/activate',
   validators.validateId('id'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
-    const userRole = req.user?.role || req.body.user_role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const campaign = await campaignService.activateCampaign(req.params.id, userId, userRole);
@@ -177,11 +182,11 @@ router.post('/:id/activate',
 router.post('/:id/pause',
   validators.validateId('id'),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const userId = req.user?.id || req.body.user_id;
-    const userRole = req.user?.role || req.body.user_role;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!userId) {
-      throw new NotFoundError('User ID required');
+      throw new NotFoundError('Authentication required');
     }
 
     const campaign = await campaignService.pauseCampaign(req.params.id, userId, userRole);

@@ -28,6 +28,7 @@ import adsRouter from './routes/ads';
 import analyticsRouter from './routes/analytics';
 import audioRouter from './routes/audio';
 import rssRouter from './routes/rss';
+import reservationsRouter from './routes/reservations';
 
 dotenv.config();
 
@@ -166,6 +167,9 @@ app.use('/api/audio',
   authMiddleware.validateJWT,
   audioRouter
 );
+
+// RTB Reservation endpoints - mixed authentication (some public, some require JWT)
+app.use('/api/reservations', reservationsRouter);
 
 // RSS endpoints are public but rate limited
 app.use('/api/rss', rssRouter);
