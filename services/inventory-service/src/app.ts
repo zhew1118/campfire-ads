@@ -11,6 +11,7 @@ import { podcastRoutes } from './routes/podcasts';
 import { episodeRoutes } from './routes/episodes';
 import { adSlotRoutes } from './routes/slots';
 import { reservationRoutes } from './routes/reservations';
+import { creativeRoutes } from './routes/creatives';
 
 dotenv.config();
 

@@ -11,6 +11,7 @@ import {
 import Joi from 'joi';
 import { APIResponse } from '../../../../common/types';
 import { CampaignService } from '../services/campaignService';
+import { creativeRoutes } from './creatives';
 
 const router = Router();
 const validator = createValidator();
@@ -18,6 +19,9 @@ const authMiddleware = createAuthMiddleware({
   secret: process.env.JWT_SECRET || 'development-jwt-secret-key'
 });
 const campaignService = new CampaignService();
+
+// Mount creative routes under campaigns FIRST (before other /:id routes)
+router.use('/', creativeRoutes);
 
 // GET /campaigns - Get campaigns for user
 router.get('/', 

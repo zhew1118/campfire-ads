@@ -44,8 +44,8 @@ COPY --from=builder --chown=nodejs:nodejs /app/services/inventory-service/dist .
 COPY --from=builder --chown=nodejs:nodejs /app/common/middleware/dist ./common/middleware/dist
 COPY --from=builder --chown=nodejs:nodejs /app/common/types ./common/types
 
-# Create logs directory with proper permissions
-RUN mkdir -p logs && chown -R nodejs:nodejs logs
+# Create logs and uploads directories with proper permissions
+RUN mkdir -p logs uploads/creatives && chown -R nodejs:nodejs logs uploads
 
 # Switch to nodejs user
 USER nodejs
