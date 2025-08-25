@@ -60,7 +60,7 @@ app.use('/podcasters', podcasterRoutes); // Podcaster management backend - mixed
 app.use('/podcasts', authMiddleware.validateJWT, podcastRoutes); // Podcast management backend - JWT required
 app.use('/episodes', authMiddleware.validateJWT, episodeRoutes); // Episode management backend - JWT required
 app.use('/slots', authMiddleware.validateJWT, adSlotRoutes); // Ad slot management backend - JWT required
-app.use('/reservations', reservationRoutes); // RTB reservation system - mixed auth (some endpoints public)
+app.use('/reservations', authMiddleware.validateJWT, reservationRoutes); // RTB reservation system - JWT required for all endpoints
 
 // 404 handler
 app.use(notFoundHandler);

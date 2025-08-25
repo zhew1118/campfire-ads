@@ -65,9 +65,9 @@ export class ReservationService {
       
       const result = await query(`
         INSERT INTO slot_reservations (
-          ad_slot_id, campaign_id, advertiser_id, bid_cpm, status, expires_at
+          ad_slot_id, campaign_id, advertiser_id, bid_cpm_micros, status, expires_at
         )
-        VALUES ($1, $2, $3, $4, 'reserved', $5)
+        VALUES ($1, $2, $3, $4, 'active', $5)
         RETURNING *
       `, [adSlotId, campaignId, advertiserId, bidCpmMicros, expiresAt]);
 

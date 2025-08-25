@@ -20,7 +20,6 @@ const reservationService = new ReservationService();
 
 // POST /reservations/reserve - Reserve an ad slot (advertiser only)
 router.post('/reserve',
-  authMiddleware.requireRole(['advertiser', 'admin']),
   validator.validate({
     body: Joi.object({
       ad_slot_id: Joi.string().uuid().required(),
@@ -30,9 +29,15 @@ router.post('/reserve',
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
     const advertiserId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!advertiserId) {
       throw new NotFoundError('Authentication required');
+    }
+    
+    // Role-based authorization - only advertisers and admins can reserve slots
+    if (!userRole || !['advertiser', 'admin'].includes(userRole)) {
+      throw new NotFoundError('Access denied - advertiser or admin role required');
     }
 
     const { ad_slot_id, campaign_id, bid_cpm_micros } = req.body;
