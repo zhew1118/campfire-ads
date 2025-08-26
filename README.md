@@ -17,7 +17,10 @@ A modern, open-source podcast advertising platform that connects podcasters with
 - **Inventory Discovery**: Browse available ad slots across all podcasts with filtering ✅
 - **Campaign Management**: Create and manage targeted advertising campaigns ✅
 - **Creative Asset Management**: Upload, manage, and organize campaign creatives (images, audio, video) ✅
+- **Global Creative Library**: Centralized creative management with reusable assets ✅
+- **Campaign-Creative Association**: Many-to-many relationship for creative reuse across campaigns ✅
 - **File Management**: Upload creative assets with validation, download, and metadata management ✅
+- **CRUD Operations**: Complete create, read, update, delete for both creatives and associations ✅
 - **Performance Analytics**: Comprehensive campaign performance dashboard ✅
 - **Category Targeting**: Target by podcast categories with real-time filtering ✅
 - **Performance Tracking**: Monitor impressions, clicks, CTR, and campaign ROI ✅

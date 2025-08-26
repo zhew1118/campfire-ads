@@ -172,30 +172,29 @@ router.get('/:id/performance', async (req: AuthenticatedRequest, res: Response) 
   }
 });
 
-// Campaign Creatives Routes
+// Campaign-Creative Association Routes
 
-// POST /campaigns/:id/creatives - Upload creative
+// POST /campaigns/:id/creatives - Assign existing creative(s) to campaign
 router.post('/:id/creatives', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.post(`/campaigns/${req.params.id}/creatives`, req.body, {
       headers: {
         'Authorization': req.headers.authorization,
-        'Content-Type': req.headers['content-type']
+        'Content-Type': 'application/json'
       }
     });
     res.status(201).json(response.data);
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
-      error: error.response?.data?.message || 'Failed to upload creative'
+      error: error.response?.data?.message || 'Failed to assign creatives to campaign'
     });
   }
 });
 
-// GET /campaigns/:id/creatives - List campaign creatives
+// GET /campaigns/:id/creatives - List creatives assigned to campaign
 router.get('/:id/creatives', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const response = await inventoryService.get(`/campaigns/${req.params.id}/creatives`, {
-      params: req.query,
       headers: {
         'Authorization': req.headers.authorization
       }
@@ -208,68 +207,7 @@ router.get('/:id/creatives', async (req: AuthenticatedRequest, res: Response) =>
   }
 });
 
-// GET /campaigns/:id/creatives/:creativeId - Get specific creative
-router.get('/:id/creatives/:creativeId', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const response = await inventoryService.get(`/campaigns/${req.params.id}/creatives/${req.params.creativeId}`, {
-      headers: {
-        'Authorization': req.headers.authorization
-      }
-    });
-    res.json(response.data);
-  } catch (error: any) {
-    res.status(error.response?.status || 500).json({
-      error: error.response?.data?.message || 'Failed to fetch creative'
-    });
-  }
-});
-
-// GET /campaigns/:id/creatives/:creativeId/download - Download creative file
-router.get('/:id/creatives/:creativeId/download', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const response = await inventoryService.get(`/campaigns/${req.params.id}/creatives/${req.params.creativeId}/download`, {
-      headers: {
-        'Authorization': req.headers.authorization
-      },
-      responseType: 'stream'
-    });
-    
-    // Forward headers from inventory service
-    if (response.headers['content-disposition']) {
-      res.setHeader('Content-Disposition', response.headers['content-disposition']);
-    }
-    if (response.headers['content-type']) {
-      res.setHeader('Content-Type', response.headers['content-type']);
-    }
-    if (response.headers['content-length']) {
-      res.setHeader('Content-Length', response.headers['content-length']);
-    }
-    
-    response.data.pipe(res);
-  } catch (error: any) {
-    res.status(error.response?.status || 500).json({
-      error: error.response?.data?.message || 'Failed to download creative'
-    });
-  }
-});
-
-// PUT /campaigns/:id/creatives/:creativeId - Update creative metadata
-router.put('/:id/creatives/:creativeId', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const response = await inventoryService.put(`/campaigns/${req.params.id}/creatives/${req.params.creativeId}`, req.body, {
-      headers: {
-        'Authorization': req.headers.authorization
-      }
-    });
-    res.json(response.data);
-  } catch (error: any) {
-    res.status(error.response?.status || 500).json({
-      error: error.response?.data?.message || 'Failed to update creative'
-    });
-  }
-});
-
-// DELETE /campaigns/:id/creatives/:creativeId - Delete creative
+// DELETE /campaigns/:id/creatives/:creativeId - Detach creative from campaign
 router.delete('/:id/creatives/:creativeId', async (req: AuthenticatedRequest, res: Response) => {
   try {
     await inventoryService.delete(`/campaigns/${req.params.id}/creatives/${req.params.creativeId}`, {
@@ -280,7 +218,7 @@ router.delete('/:id/creatives/:creativeId', async (req: AuthenticatedRequest, re
     res.status(204).send();
   } catch (error: any) {
     res.status(error.response?.status || 500).json({
-      error: error.response?.data?.message || 'Failed to delete creative'
+      error: error.response?.data?.message || 'Failed to detach creative from campaign'
     });
   }
 });

@@ -136,6 +136,34 @@ export interface User {
   updated_at: string;
 }
 
+export interface Creative {
+  id: string;
+  advertiser_id: string;
+  name: string;
+  file_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  creative_type: 'image' | 'audio' | 'video';
+  width?: number;
+  height?: number;
+  duration?: number;
+  is_approved: boolean;
+  rejection_reason?: string;
+  checksum?: string;
+  upload_ip?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CampaignCreativeAssociation {
+  id: string;
+  campaign_id: string;
+  creative_id: string;
+  assigned_at: string;
+  assigned_by: string;
+}
+
 export interface APIResponse<T = any> {
   data?: T;
   error?: string;

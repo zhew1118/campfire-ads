@@ -11,7 +11,7 @@ import { podcastRoutes } from './routes/podcasts';
 import { episodeRoutes } from './routes/episodes';
 import { adSlotRoutes } from './routes/slots';
 import { reservationRoutes } from './routes/reservations';
-import { creativeRoutes } from './routes/creatives';
+import { creativesRouter } from './routes/creatives';
 
 dotenv.config();
 
@@ -57,6 +57,7 @@ app.get('/health', (req, res) => {
 // API routes - matches what API Gateway expects
 app.use('/inventory', inventoryRoutes); // Browse available ad slots (mixed public/private)
 app.use('/campaigns', authMiddleware.validateJWT, campaignRoutes); // Campaign management backend - JWT required
+app.use('/creatives', authMiddleware.validateJWT, creativesRouter); // Global creative library - JWT required
 app.use('/podcasters', podcasterRoutes); // Podcaster management backend - mixed auth
 app.use('/podcasts', authMiddleware.validateJWT, podcastRoutes); // Podcast management backend - JWT required
 app.use('/episodes', authMiddleware.validateJWT, episodeRoutes); // Episode management backend - JWT required

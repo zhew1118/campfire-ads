@@ -46,12 +46,44 @@ Dashboard → API Gateway → Microservices → Database
 - **Update imports** - ensure all services use common utilities
 - **Test after cleanup** - verify services still compile and work
 
+### 5. **🚨 CRITICAL: Authentication Pattern** 🔐
+**NEVER use individual auth middleware in service routes - use global JWT validation only!**
+
+❌ **WRONG** - Individual auth middleware in routes:
+```typescript
+// DON'T DO THIS in routes/creatives.ts:
+const authMiddleware = createAuthMiddleware({
+  secret: process.env.JWT_SECRET
+});
+router.post('/', authMiddleware.validateJWT, ...)
+```
+
+✅ **CORRECT** - Rely on global auth from app.ts:
+```typescript
+// In app.ts (GLOBAL):
+app.use('/creatives', authMiddleware.validateJWT, creativesRouter);
+
+// In routes/creatives.ts (NO AUTH MIDDLEWARE):
+router.post('/', asyncHandler(async (req: AuthenticatedRequest, res) => {
+  const userId = req.user?.id; // ✅ Available from global auth
+  // Route logic here
+}))
+```
+
+**Why this matters:**
+- ✅ **Prevents auth conflicts** - No duplicate JWT parsing
+- ✅ **Ensures ownership security** - User can only access their own data
+- ✅ **Consistent patterns** - Same as campaigns, podcasts, episodes
+- ❌ **Individual auth causes malformed token errors** 
+- ❌ **Individual auth allows cross-user data access vulnerabilities**
+
 **This prevents:**
 - ❌ Building services that don't match Gateway expectations
 - ❌ Code duplication across services  
 - ❌ Inconsistent API contracts
 - ❌ Missing authentication/security patterns
 - ❌ Maintenance nightmare from duplicate code
+- ❌ **Auth conflicts and security vulnerabilities** 🚨
 
 ## 🔄 **DOCUMENTATION UPDATE RULE**
 
@@ -75,7 +107,7 @@ Dashboard → API Gateway → Microservices → Database
 
 **This ensures documentation stays synchronized and Claude sessions have accurate context.**
 
-## 🎯 Current Status: **Phase 2A.5+++ Complete - Campaign Creative Management FULLY IMPLEMENTED** ✅
+## 🎯 Current Status: **Phase 2A.5++++ Complete - Creative Management Production Ready** ✅
 
 ### **Phase 2A Complete:**
 - ✅ **API Gateway**: Secure routing with enterprise middleware
@@ -130,6 +162,9 @@ Dashboard → API Gateway → Microservices → Database
 - ✅ **Route Ordering Fix**: Resolved creative route conflicts by proper mounting order
 - ✅ **Database Schema**: campaign_creatives table with foreign keys, metadata, audit fields
 - ✅ **Production Testing**: Full upload/download cycle tested with MP3 file successfully
+- ✅ **DELETE/DETACH Operations**: Fixed route ordering and validation conflicts - all CRUD operations working
+- ✅ **End-to-End Testing**: Complete creative management workflow validated through API Gateway
+- ✅ **Database Integrity**: Campaign-creative associations properly managed with foreign key constraints
 
 ## 🎯 **Business Flow Implementation** ✅
 
@@ -164,26 +199,36 @@ Login → Browse Inventory → View Available Slots → Create Campaigns → Bid
 - ✅ **Search-Based Discovery**: Inventory search with filters (no auto-loading)
 - ✅ **Database Schema Fixes**: All column references corrected (podcaster_id)
 
-## 🚀 **Next Priority: Campaign Creative Management** 📈
+## 🚀 **Phase 2A.5++++ Complete - Creative Management Production Ready** ✅
 
-### **Remaining Implementation Gap:**
+### **Creative Management System Fully Implemented:**
 
-**📈 Campaign Creatives Management**
-- ❌ **Creative Assets**: Campaigns have no creative upload/management system
-- ❌ **Asset Storage**: No file storage for images, audio, video creatives
-- ❌ **Creative Validation**: No validation for creative specifications
+**📈 Campaign Creatives Management - ALL COMPLETE**
+- ✅ **Global Creative Library**: Advertiser-owned creative assets with full metadata
+- ✅ **Campaign-Creative Associations**: Many-to-many relationships for creative reuse  
+- ✅ **File Upload & Storage**: Multipart form data with 500MB limit and validation
+- ✅ **Creative Validation**: MIME type detection, file extension validation, size limits
+- ✅ **Complete CRUD Operations**: Create, read, update, delete for both creatives and associations
+- ✅ **Database Schema**: Proper foreign keys, constraints, and audit fields
+- ✅ **Route Architecture**: Fixed ordering conflicts and validation patterns
+- ✅ **API Integration**: Working through both direct service and API Gateway
+- ✅ **Production Testing**: End-to-end validation of all operations
 
-### **Campaign Creatives Implementation Tasks** 📋
+### **Creative Management API Endpoints - ALL WORKING** ✅
 
 ```
-📈 Campaign Creatives Management
-  □ Add campaign_creatives table (id, campaign_id, file_path, type, specs)
-  □ Implement POST /api/campaigns/:id/creatives (upload)
-  □ Implement GET /api/campaigns/:id/creatives (list)
-  □ Implement PUT /api/campaigns/:id/creatives/:id (update)
-  □ Implement DELETE /api/campaigns/:id/creatives/:id (delete)
-  □ Add file storage service (local/S3 integration)
-  □ Add creative validation (size, format, duration limits)
+✅ Global Creative Library
+  POST   /api/creatives              # Upload new creative to advertiser's library
+  GET    /api/creatives              # List advertiser's creative library (paginated)
+  GET    /api/creatives/:id          # Get creative details
+  GET    /api/creatives/:id/download # Download creative file
+  PUT    /api/creatives/:id          # Update creative metadata
+  DELETE /api/creatives/:id          # Delete creative from library
+
+✅ Campaign-Creative Associations  
+  POST   /api/campaigns/:id/creatives          # Assign existing creative(s) to campaign
+  GET    /api/campaigns/:id/creatives          # List creatives assigned to campaign
+  DELETE /api/campaigns/:id/creatives/:id      # Detach creative from campaign
 ```
 
 ## 🚀 **Next Priority: Phase 2B - RTB Engine + Service Completion** 🔄

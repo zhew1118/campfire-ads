@@ -20,6 +20,7 @@ import authRouter from './routes/auth';
 import podcastersRouter from './routes/podcasters';
 import advertisersRouter from './routes/advertisers';
 import campaignsRouter from './routes/campaigns';
+import creativesRouter from './routes/creatives';
 import inventoryRouter from './routes/inventory';
 import podcastsRouter from './routes/podcasts';
 import episodesRouter from './routes/episodes';
@@ -131,6 +132,11 @@ app.use('/api/advertisers',
 app.use('/api/campaigns', 
   authMiddleware.validateJWT,
   campaignsRouter
+);
+
+app.use('/api/creatives', 
+  authMiddleware.validateJWT,
+  creativesRouter
 );
 
 app.use('/api/inventory', 
