@@ -231,50 +231,68 @@ Login → Browse Inventory → View Available Slots → Create Campaigns → Bid
   DELETE /api/campaigns/:id/creatives/:id      # Detach creative from campaign
 ```
 
-## 🚀 **Next Priority: Phase 2B - RTB Engine + Service Completion** 🔄
+## 🚀 **Next Priority: Phase 2B - Tracking Service (Revenue Generation)** 🔄
 
-**COMPLETED** Phase 2A.5 - Inventory Service Foundation ✅  
-**NEXT** (Phase 2B) - High-performance RTB engine:
+**COMPLETED** Phase 2A.5++++ - Creative Management Production Ready ✅  
+**NEXT** (Phase 2B) - Tracking service for immediate revenue generation:
 
-### **Why Phase 2A.5 First?**
-- ✅ **Natural progression**: API Gateway → Real inventory → RTB bidding
-- ✅ **Immediate user value**: Podcasters add content, advertisers browse
-- ✅ **Data foundation**: Real inventory for RTB engine to bid on
-- ✅ **Familiar stack**: Node.js + PostgreSQL (no new languages yet)
-- ✅ **Dashboard integration**: Extends existing React frontend
+### **🎯 Strategic Pivot Rationale:**
+- ✅ **Immediate Revenue**: Start billing from day 1 with verified impressions
+- ✅ **No Migration Required**: Works with existing podcast infrastructure
+- ✅ **IAB Compliance**: Industry-standard tracking methodology  
+- ✅ **Progressive Enhancement**: Three verification tiers (verified → prefix → host-reported)
+- ✅ **Builds on Foundation**: Uses existing creative management + campaign system
 
-### **Implementation Plan:**
+### **Phase 2B: Tracking Service Implementation Plan**
 
-1. **Inventory Service (Node.js + PostgreSQL)**
-   - CRUD operations for podcasts, episodes, ad slots
-   - CPM floor pricing management
-   - Pre/mid/post-roll slot configuration  
-   - Inventory metadata storage
+**Based on tracking-service.md specification:**
 
-2. **Database Design**
+1. **Database Schema (New Tables)**
    ```sql
-   podcasts (id, name, category, rss_url, owner_id, created_at)
-   episodes (id, podcast_id, title, duration, audio_url, status)
-   ad_slots (id, episode_id, position, duration, cpm_floor, available)
-   campaigns (id, advertiser_id, name, budget, status, targeting)
+   placements(
+     id UUID PK,
+     slot_id UUID,
+     campaign_id UUID,
+     creative_id UUID,
+     verification_tier TEXT CHECK (verification_tier IN ('ONECAMPFIRE_VERIFIED','HOST_VERIFIED','PREFIX')),
+     tracking_key TEXT UNIQUE,
+     created_at TIMESTAMPTZ
+   )
+   
+   impressions_raw(
+     id BIGSERIAL PK,
+     ts TIMESTAMPTZ,
+     ip_hash TEXT, ua_hash TEXT,
+     status INT, method TEXT,
+     range_start BIGINT, range_end BIGINT, bytes_sent BIGINT,
+     placement_id UUID, campaign_id UUID, creative_id UUID, slot_id UUID, episode_id UUID, podcast_id UUID,
+     referrer_host TEXT, user_agent TEXT
+   )
+   
+   host_reports(
+     id BIGSERIAL PK,
+     placement_id UUID,
+     source_host TEXT, evidence_url TEXT,
+     period_start DATE, period_end DATE,
+     downloads INT,
+     created_at TIMESTAMPTZ
+   )
    ```
 
-3. **Dashboard Features**
-   - **Podcaster Dashboard**: Add podcasts, upload episodes, set CPM pricing
-   - **Advertiser Dashboard**: Browse inventory, view available slots  
-   - **Basic Analytics**: Inventory stats, campaign performance
-   - **Admin Panel**: User management, platform overview
+2. **Tracking Infrastructure**
+   - **Redirect URL tracking**: `GET /i/{trackingKey}.mp3` with IAB-style logging
+   - **Prefix mode**: `GET /prefix?url=<episode-url>` for episode-level tracking
+   - **Host-verified fallback**: Manual reporting via `POST /api/host-reports`
 
-4. **API Endpoints**
-   ```
-   POST /api/podcasts                    # Create podcast
-   GET  /api/podcasts                    # List podcasts
-   POST /api/podcasts/{id}/episodes      # Add episode  
-   GET  /api/episodes/{id}/slots         # View ad slots
-   PUT  /api/slots/{id}/pricing          # Set CPM floors
-   GET  /api/inventory/available         # Browse inventory
-   POST /api/campaigns                   # Create campaign
-   ```
+3. **End-to-End Workflows**
+   - **ONECAMPFIRE_VERIFIED**: Podcaster pastes tracking URL → server logs → 302 to creative
+   - **PREFIX**: Episode-level tracking via feed wrapper
+   - **HOST_VERIFIED**: Download creative → manual stats reporting
+
+4. **Analytics & Billing**
+   - IAB-compliant deduplication (IP+UA within 24h)
+   - Qualified impression thresholds by bytes/Range
+   - Automated billing: qualified impressions × CPM
 
 ### **Phase 2A.5 Implementation Tasks** ✅ **ALL COMPLETED** 
 ```
@@ -315,11 +333,11 @@ Login → Browse Inventory → View Available Slots → Create Campaigns → Bid
   ✅ Database seeding with sample data working
 ```
 
-### **Phase 2B: RTB Engine (Postponed)** 📅
+### **Phase 3A: RTB Engine (Moved from 2B)** 📅
 - **RTB Engine**: High-performance Go + gRPC bidding system  
 - **Service Extraction**: Microservices for analytics, audio processing
 - **Performance**: Sub-10ms RTB responses, 10k+ req/s capability
-- **Rationale**: Build inventory foundation first for better RTB integration
+- **Rationale**: Build revenue-generating tracking service first, then optimize with RTB
 
 ### **Phase 2A Completed Successfully:**
 - ✅ **Dashboard**: React app running at `http://localhost:3001`

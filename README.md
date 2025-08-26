@@ -25,7 +25,7 @@ A modern, open-source podcast advertising platform that connects podcasters with
 - **Category Targeting**: Target by podcast categories with real-time filtering ✅
 - **Performance Tracking**: Monitor impressions, clicks, CTR, and campaign ROI ✅
 - **Role-Based Dashboard**: Dedicated demand-side interface with live metrics ✅
-- **Real-Time Bidding**: RTB engine foundation ready (*Phase 2B - Next*)
+- **Ad Impression Tracking**: IAB-compliant tracking with billing automation (*Phase 2B - Next*)
 
 ### Platform Features ✅
 - **Two-Sided Marketplace**: Complete supply/demand workflows with role-based business logic ✅
@@ -47,7 +47,8 @@ A modern, open-source podcast advertising platform that connects podcasters with
 - **Security Middleware**: Centralized JWT, rate limiting, validation, logging (✅ Complete)
 - **Database**: PostgreSQL 15+ with production-ready schemas (✅ Complete)
 - **Cache**: Redis 7+ for distributed rate limiting and session management (✅ Complete)
-- **RTB Engine**: Go + gRPC for high-performance bidding (*Phase 2B - Next*)
+- **Tracking Service**: IAB-compliant impression tracking + billing (*Phase 2B - Next*)
+- **RTB Engine**: Go + gRPC for high-performance bidding (*Phase 3A - Future*)
 - **Audio Processing**: Go + FFmpeg for dynamic ad insertion (*Future*)
 - **Communication**: REST + gRPC for performance-critical paths
 
@@ -99,7 +100,8 @@ campfire-ads/
 │   └── types/               # Shared TypeScript interfaces
 ├── services/                # 🔄 Microservices
 │   ├── inventory-service/   # ✅ Podcast & ad inventory management (Phase 2A.5)
-│   ├── rtb-engine/         # Go-based real-time bidding engine (Phase 2B)
+│   ├── tracking-service/    # IAB-compliant impression tracking + billing (Phase 2B)
+│   ├── rtb-engine/         # Go-based real-time bidding engine (Phase 3A)
 │   ├── analytics-service/   # Event tracking & reporting (Future)
 │   ├── audio-service/      # Dynamic ad insertion (Future)
 │   └── rss-service/        # RSS feed generation with ads (Future)
@@ -226,11 +228,12 @@ chmod +x scripts/setup.sh
 - **End-to-End Testing**: Manual verification confirms full campaigns functionality ✅
 - **Ad Slots Authentication**: Fixed header forwarding in API Gateway slots routes ✅
 
-### Phase 2B Next (RTB Engine + Service Completion) 🔄  
-- **RTB Engine**: Go-based real-time bidding engine for sub-10ms responses
-- **Service Extraction**: Complete analytics, audio processing, RSS services
-- **Performance**: gRPC communication for performance-critical paths
-- **Timeline**: Ready for implementation - complete foundation established
+### Phase 2B Next (Tracking Service - Revenue Generation) 🔄  
+- **Tracking Service**: IAB-compliant impression tracking with 3 verification tiers
+- **Revenue Generation**: Immediate billing from verified impressions (CPM × impressions)
+- **Progressive Enhancement**: Redirect tracking → prefix mode → host-verified fallback
+- **No Migration Required**: Works with existing podcast infrastructure
+- **Timeline**: Ready for implementation - builds on existing creative management
 
 ### Legacy Stack (Optional)
 - **Prebid Server**: http://localhost:8000 (if running)
@@ -342,7 +345,14 @@ docker-compose down
 - ✅ **Testing**: End-to-end manual verification of all core functionality
 - ✅ **Foundation**: Secure two-sided marketplace with production-ready RTB reservation system
 
-### Upcoming Features (Phase 2B)
+### Upcoming Features (Phase 2B - Tracking Service)
+- **IAB-Compliant Tracking**: Industry-standard impression counting and deduplication
+- **Three Verification Tiers**: ONECAMPFIRE_VERIFIED → PREFIX → HOST_VERIFIED
+- **Automated Billing**: Real-time CPM billing based on qualified impressions  
+- **Progressive Enhancement**: Works with all podcast hosting platforms
+- **Revenue Generation**: Start billing immediately without complex RTB system
+
+### Future Features (Phase 3A - RTB Optimization)
 - **RTB Engine**: Go-based real-time bidding system with sub-10ms responses
 - **Analytics Service**: Advanced performance tracking and reporting
 - **Audio Processing**: Dynamic ad insertion capabilities with FFmpeg
@@ -378,4 +388,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Enterprise-grade two-sided podcast advertising marketplace** 🎙️  
-**Phase 1 ✅ | Phase 2A ✅ | Phase 2A.5 ✅ | RTB Engine Next 🚀**
+**Phase 1 ✅ | Phase 2A ✅ | Phase 2A.5++++ ✅ | Tracking Service Next 🚀**
