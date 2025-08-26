@@ -89,10 +89,10 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res) => {
 
 **🚨 CRITICAL: When completing any major phase or milestone:**
 
-1. **Update all three documentation files in order:**
+1. **Update documentation files in order:**
    - `README.md` - Project overview, quick start, current features
    - `CLAUDE.md` - Development commands, testing procedures, current status  
-   - `stack.md` - Architecture progress, phase completion, performance results
+   - `stack.md` - Architecture progress, phase completion, performance results (DO NOT COMMIT)
 
 2. **Update content consistently across files:**
    - ✅ Mark completed phases and features
@@ -101,13 +101,14 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res) => {
    - 🏗️ Reflect current project structure
 
 3. **Commit documentation updates together:**
-   - Create single commit with all three file updates
+   - Create single commit with README.md and CLAUDE.md updates ONLY
+   - DO NOT commit stack.md changes (keep local for reference)
    - Use descriptive commit message explaining what was completed
    - Ensure future Claude sessions get accurate project state
 
 **This ensures documentation stays synchronized and Claude sessions have accurate context.**
 
-## 🎯 Current Status: **Phase 2A.5++++ Complete - Creative Management Production Ready** ✅
+## 🎯 Current Status: **Phase 2B Ready - Database Migration Complete** ✅
 
 ### **Phase 2A Complete:**
 - ✅ **API Gateway**: Secure routing with enterprise middleware
@@ -231,7 +232,41 @@ Login → Browse Inventory → View Available Slots → Create Campaigns → Bid
   DELETE /api/campaigns/:id/creatives/:id      # Detach creative from campaign
 ```
 
-## 🚀 **Next Priority: Phase 2B - Tracking Service (Revenue Generation)** 🔄
+## 🚀 **Phase 2B Database Migration Complete - Backward Compatible** ✅
+
+### **Database Schema Enhancement Completed:**
+
+**📊 Migration 04 - Pre-Phase 2B Improvements - ALL COMPLETE**
+- ✅ **Backward Compatibility**: Keeps existing `is_approved` and `rejection_reason` columns  
+- ✅ **New Status Lifecycle**: Added `status` column with CHECK constraint (draft/in_review/approved/rejected/archived)
+- ✅ **Audio Metadata**: Added `audio_bitrate_kbps`, `audio_sample_rate_hz`, `audio_channels`, `lufs_integrated`, `transcript_url`
+- ✅ **CDN Integration**: Added `cdn_url` and `version` columns for content delivery
+- ✅ **Campaign Enhancements**: Added `weight`, `flight_start/end`, `position`, `frequency_cap_per_episode`, `notes`
+- ✅ **Tracking Tables**: Created `placements`, `impressions_raw`, `host_reports` for Phase 2B
+- ✅ **Data Migration**: Migrated `is_approved` → `status` while preserving legacy column
+- ✅ **Performance Indexes**: Added indexes for advertiser, campaign-creative relationships
+- ✅ **Production Testing**: API fully functional after migration - no breaking changes
+
+### **Migration Results - Zero Downtime Deployment:**
+```json
+// API response shows both legacy and new columns working
+{
+  "is_approved": true,           // Legacy column (kept)
+  "status": "approved",          // New status lifecycle  
+  "cdn_url": "https://cdn.onecampfire.media/uploads/...",
+  "version": 1,
+  "audio_bitrate_kbps": 128,     // Audio metadata
+  "lufs_integrated": "-16.00"    // Loudness standards
+}
+```
+
+**✅ Zero Breaking Changes:**
+- ✅ **Existing API**: All current endpoints work unchanged
+- ✅ **Legacy Support**: `is_approved` boolean still functional
+- ✅ **Gradual Migration**: Can migrate to `status` column over time
+- ✅ **Docker Production**: All containers healthy and functional
+
+## 🚀 **Next Priority: Phase 2B - Tracking Service Implementation** 🔄
 
 **COMPLETED** Phase 2A.5++++ - Creative Management Production Ready ✅  
 **NEXT** (Phase 2B) - Tracking service for immediate revenue generation:
