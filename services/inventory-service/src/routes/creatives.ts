@@ -30,7 +30,13 @@ const createCreativeSchema = Joi.object({
   creative_type: Joi.string().valid('image', 'audio', 'video').optional(),
   width: Joi.number().integer().positive().optional(),
   height: Joi.number().integer().positive().optional(),
-  duration: Joi.number().integer().positive().optional()
+  duration: Joi.number().integer().positive().optional(),
+  audio_bitrate_kbps: Joi.number().integer().positive().optional(),
+  audio_sample_rate_hz: Joi.number().integer().positive().optional(),
+  audio_channels: Joi.number().integer().positive().max(8).optional(),
+  lufs_integrated: Joi.number().optional(),
+  transcript_url: Joi.string().uri().optional(),
+  status: Joi.string().valid('draft', 'in_review', 'approved', 'rejected', 'archived').optional()
 });
 
 const updateCreativeSchema = Joi.object({
@@ -38,7 +44,13 @@ const updateCreativeSchema = Joi.object({
   creative_type: Joi.string().valid('image', 'audio', 'video').optional(),
   width: Joi.number().integer().positive().optional(),
   height: Joi.number().integer().positive().optional(),
-  duration: Joi.number().integer().positive().optional()
+  duration: Joi.number().integer().positive().optional(),
+  audio_bitrate_kbps: Joi.number().integer().positive().optional(),
+  audio_sample_rate_hz: Joi.number().integer().positive().optional(),
+  audio_channels: Joi.number().integer().positive().max(8).optional(),
+  lufs_integrated: Joi.number().optional(),
+  transcript_url: Joi.string().uri().optional(),
+  status: Joi.string().valid('draft', 'in_review', 'approved', 'rejected', 'archived').optional()
 });
 
 // POST /creatives - Upload new creative to advertiser's library

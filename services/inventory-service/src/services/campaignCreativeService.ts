@@ -3,12 +3,22 @@ import { CampaignCreativeAssociation, Creative } from '../../../../common/types'
 import { NotFoundError, ConflictError, DatabaseError, AuthorizationError } from '../../../../common/middleware';
 import { v4 as uuidv4 } from 'uuid';
 
+interface CampaignCreativeData {
+  weight?: number;
+  flight_start?: string;
+  flight_end?: string;
+  position?: string;
+  frequency_cap_per_episode?: number;
+  notes?: string;
+}
+
 export class CampaignCreativeService {
   // Assign existing creative(s) to campaign
   async assignCreativesToCampaign(
     campaignId: string, 
     creativeIds: string[], 
-    advertiserId: string
+    advertiserId: string,
+    additionalData?: CampaignCreativeData
   ): Promise<CampaignCreativeAssociation[]> {
     try {
       // First verify campaign ownership
@@ -45,9 +55,23 @@ export class CampaignCreativeService {
       for (const creativeId of creativeIds) {
         const associationId = uuidv4();
         const result = await query(
-          `INSERT INTO campaign_creatives (id, campaign_id, creative_id, assigned_at, assigned_by) 
-           VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-          [associationId, campaignId, creativeId, timestamp, advertiserId]
+          `INSERT INTO campaign_creatives (
+             id, campaign_id, creative_id, assigned_at, assigned_by,
+             weight, flight_start, flight_end, position, frequency_cap_per_episode, notes
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+          [
+            associationId, 
+            campaignId, 
+            creativeId, 
+            timestamp, 
+            advertiserId,
+            additionalData?.weight || 100,
+            additionalData?.flight_start || null,
+            additionalData?.flight_end || null,
+            additionalData?.position || null,
+            additionalData?.frequency_cap_per_episode || null,
+            additionalData?.notes || null
+          ]
         );
         associations.push(result.rows[0]);
       }
@@ -121,6 +145,90 @@ export class CampaignCreativeService {
       }
       console.error('Error unassigning creative from campaign:', error);
       throw new DatabaseError('Failed to unassign creative from campaign');
+    }
+  }
+
+  // Update campaign creative association
+  async updateCampaignCreative(
+    campaignId: string,
+    creativeId: string,
+    advertiserId: string,
+    data: CampaignCreativeData
+  ): Promise<CampaignCreativeAssociation | null> {
+    try {
+      // Verify campaign and creative ownership
+      const campaignResult = await query('SELECT id FROM campaigns WHERE id = $1 AND advertiser_id = $2', [campaignId, advertiserId]);
+      if (campaignResult.rows.length === 0) {
+        throw new NotFoundError('Campaign not found or access denied');
+      }
+
+      const creativeResult = await query('SELECT id FROM creatives WHERE id = $1 AND advertiser_id = $2', [creativeId, advertiserId]);
+      if (creativeResult.rows.length === 0) {
+        throw new NotFoundError('Creative not found or access denied');
+      }
+
+      // Build update query dynamically
+      const updates: string[] = [];
+      const values: any[] = [];
+      let paramCount = 1;
+
+      if (data.weight !== undefined) {
+        updates.push(`weight = $${paramCount++}`);
+        values.push(data.weight);
+      }
+
+      if (data.flight_start !== undefined) {
+        updates.push(`flight_start = $${paramCount++}`);
+        values.push(data.flight_start);
+      }
+
+      if (data.flight_end !== undefined) {
+        updates.push(`flight_end = $${paramCount++}`);
+        values.push(data.flight_end);
+      }
+
+      if (data.position !== undefined) {
+        updates.push(`position = $${paramCount++}`);
+        values.push(data.position);
+      }
+
+      if (data.frequency_cap_per_episode !== undefined) {
+        updates.push(`frequency_cap_per_episode = $${paramCount++}`);
+        values.push(data.frequency_cap_per_episode);
+      }
+
+      if (data.notes !== undefined) {
+        updates.push(`notes = $${paramCount++}`);
+        values.push(data.notes);
+      }
+
+      if (updates.length === 0) {
+        // Return existing association if no updates
+        const result = await query(
+          'SELECT * FROM campaign_creatives WHERE campaign_id = $1 AND creative_id = $2',
+          [campaignId, creativeId]
+        );
+        return result.rows[0] || null;
+      }
+
+      // Add campaign_id and creative_id to values for WHERE clause
+      values.push(campaignId, creativeId);
+
+      const queryText = `
+        UPDATE campaign_creatives 
+        SET ${updates.join(', ')}
+        WHERE campaign_id = $${paramCount++} AND creative_id = $${paramCount++}
+        RETURNING *
+      `;
+
+      const result = await query(queryText, values);
+      return result.rows[0] || null;
+    } catch (error: any) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      console.error('Error updating campaign creative:', error);
+      throw new DatabaseError('Failed to update campaign creative');
     }
   }
 

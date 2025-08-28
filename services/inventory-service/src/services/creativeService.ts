@@ -12,6 +12,12 @@ interface CreateCreativeData {
   width?: number;
   height?: number;
   duration?: number;
+  audio_bitrate_kbps?: number;
+  audio_sample_rate_hz?: number;
+  audio_channels?: number;
+  lufs_integrated?: number;
+  transcript_url?: string;
+  status?: 'draft' | 'in_review' | 'approved' | 'rejected' | 'archived';
 }
 
 interface UpdateCreativeData {
@@ -20,6 +26,12 @@ interface UpdateCreativeData {
   width?: number;
   height?: number;
   duration?: number;
+  audio_bitrate_kbps?: number;
+  audio_sample_rate_hz?: number;
+  audio_channels?: number;
+  lufs_integrated?: number;
+  transcript_url?: string;
+  status?: 'draft' | 'in_review' | 'approved' | 'rejected' | 'archived';
 }
 
 export class CreativeService {
@@ -130,10 +142,23 @@ export class CreativeService {
       const queryText = `
         INSERT INTO creatives (
           id, advertiser_id, name, file_path, file_name, file_size, mime_type, creative_type,
-          width, height, duration, checksum, upload_ip, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+          width, height, duration, checksum, upload_ip, created_at, updated_at,
+          audio_bitrate_kbps, audio_sample_rate_hz, audio_channels, lufs_integrated, transcript_url,
+          cdn_url, version, status
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
         RETURNING *
       `;
+
+      // Generate CDN URL
+      const cdnUrl = `https://cdn.onecampfire.media${relativePath}`;
+      
+      // Set default audio metadata for audio files
+      const audioDefaults = creativeType === 'audio' ? {
+        audio_bitrate_kbps: data.audio_bitrate_kbps || 128,
+        audio_sample_rate_hz: data.audio_sample_rate_hz || 44100,
+        audio_channels: data.audio_channels || 2,
+        lufs_integrated: data.lufs_integrated || -16.0
+      } : {};
 
       const values = [
         creativeId,
@@ -150,7 +175,15 @@ export class CreativeService {
         checksum,
         uploadIp || null,
         timestamp,
-        timestamp
+        timestamp,
+        audioDefaults.audio_bitrate_kbps || data.audio_bitrate_kbps || null,
+        audioDefaults.audio_sample_rate_hz || data.audio_sample_rate_hz || null,
+        audioDefaults.audio_channels || data.audio_channels || null,
+        audioDefaults.lufs_integrated || data.lufs_integrated || null,
+        data.transcript_url || null,
+        cdnUrl,
+        1, // version
+        data.status || 'draft'
       ];
 
       const result = await query(queryText, values);
@@ -228,9 +261,42 @@ export class CreativeService {
         values.push(data.duration);
       }
 
+      if (data.audio_bitrate_kbps !== undefined) {
+        updates.push(`audio_bitrate_kbps = $${paramCount++}`);
+        values.push(data.audio_bitrate_kbps);
+      }
+
+      if (data.audio_sample_rate_hz !== undefined) {
+        updates.push(`audio_sample_rate_hz = $${paramCount++}`);
+        values.push(data.audio_sample_rate_hz);
+      }
+
+      if (data.audio_channels !== undefined) {
+        updates.push(`audio_channels = $${paramCount++}`);
+        values.push(data.audio_channels);
+      }
+
+      if (data.lufs_integrated !== undefined) {
+        updates.push(`lufs_integrated = $${paramCount++}`);
+        values.push(data.lufs_integrated);
+      }
+
+      if (data.transcript_url !== undefined) {
+        updates.push(`transcript_url = $${paramCount++}`);
+        values.push(data.transcript_url);
+      }
+
+      if (data.status !== undefined) {
+        updates.push(`status = $${paramCount++}`);
+        values.push(data.status);
+      }
+
       if (updates.length === 0) {
         return this.getCreativeById(id, advertiserId);
       }
+
+      // Always increment version on update
+      updates.push(`version = version + 1`);
 
       updates.push(`updated_at = $${paramCount++}`);
       values.push(new Date().toISOString());

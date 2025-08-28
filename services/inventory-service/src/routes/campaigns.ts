@@ -214,7 +214,13 @@ router.post('/:id/creatives',
   validators.validateId('id'),
   validator.validate({
     body: Joi.object({
-      creative_ids: Joi.array().items(Joi.string().uuid()).required().min(1)
+      creative_ids: Joi.array().items(Joi.string().uuid()).required().min(1),
+      weight: Joi.number().integer().min(1).max(1000).optional(),
+      flight_start: Joi.string().isoDate().optional(),
+      flight_end: Joi.string().isoDate().optional(),
+      position: Joi.string().optional(),
+      frequency_cap_per_episode: Joi.number().integer().positive().optional(),
+      notes: Joi.string().optional()
     })
   }),
   asyncHandler(async (req: AuthenticatedRequest, res) => {
@@ -229,10 +235,12 @@ router.post('/:id/creatives',
       throw new NotFoundError('Only advertisers can assign creatives to campaigns');
     }
 
+    const { creative_ids, ...additionalData } = req.body;
     const associations = await campaignCreativeService.assignCreativesToCampaign(
       req.params.id,
-      req.body.creative_ids,
-      userId
+      creative_ids,
+      userId,
+      additionalData
     );
     
     const response: APIResponse = {
@@ -242,6 +250,55 @@ router.post('/:id/creatives',
     };
     
     res.status(201).json(response);
+  })
+);
+
+// PUT /campaigns/:id/creatives/:creativeId - Update campaign creative association
+router.put('/:id/creatives/:creativeId',
+  validator.validate({
+    params: Joi.object({
+      id: Joi.string().uuid().required(),
+      creativeId: Joi.string().uuid().required()
+    }),
+    body: Joi.object({
+      weight: Joi.number().integer().min(1).max(1000).optional(),
+      flight_start: Joi.string().isoDate().optional(),
+      flight_end: Joi.string().isoDate().optional(),
+      position: Joi.string().optional(),
+      frequency_cap_per_episode: Joi.number().integer().positive().optional(),
+      notes: Joi.string().optional()
+    })
+  }),
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    
+    if (!userId) {
+      throw new NotFoundError('Authentication required');
+    }
+
+    if (userRole !== 'advertiser' && userRole !== 'admin') {
+      throw new NotFoundError('Only advertisers can update campaign creatives');
+    }
+
+    const association = await campaignCreativeService.updateCampaignCreative(
+      req.params.id,
+      req.params.creativeId,
+      userId,
+      req.body
+    );
+    
+    if (!association) {
+      throw new NotFoundError('Campaign creative association not found');
+    }
+    
+    const response: APIResponse = {
+      status: 'success',
+      timestamp: new Date().toISOString(),
+      data: association
+    };
+    
+    res.json(response);
   })
 );
 
@@ -286,17 +343,18 @@ router.get('/:id/creatives',
       throw new NotFoundError('Authentication required');
     }
 
-    const unassigned = await campaignCreativeService.unassignCreativeFromCampaign(
+    const creatives = await campaignCreativeService.getCampaignCreatives(
       req.params.id,
-      req.params.creativeId,
       userId
     );
     
-    if (!unassigned) {
-      throw new NotFoundError('Creative assignment not found');
-    }
+    const response: APIResponse = {
+      status: 'success',
+      timestamp: new Date().toISOString(),
+      data: creatives
+    };
     
-    res.status(204).send();
+    res.json(response);
   })
 );
 
