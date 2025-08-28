@@ -108,7 +108,7 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res) => {
 
 **This ensures documentation stays synchronized and Claude sessions have accurate context.**
 
-## 🎯 Current Status: **Phase 2B Ready - Database Migration Complete** ✅
+## 🎯 Current Status: **Phase 2B Database Migration + Creative Management Complete** ✅
 
 ### **Phase 2A Complete:**
 - ✅ **API Gateway**: Secure routing with enterprise middleware
@@ -166,6 +166,11 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res) => {
 - ✅ **DELETE/DETACH Operations**: Fixed route ordering and validation conflicts - all CRUD operations working
 - ✅ **End-to-End Testing**: Complete creative management workflow validated through API Gateway
 - ✅ **Database Integrity**: Campaign-creative associations properly managed with foreign key constraints
+- ✅ **Campaign-Creative Updates**: New PUT endpoint for updating association metadata (weight, position, notes)
+- ✅ **Enhanced Audio Metadata**: Bitrate, sample rate, LUFS levels, transcript URLs working
+- ✅ **Status Lifecycle**: Draft → In Review → Approved → Rejected → Archived workflow implemented
+- ✅ **Database Testing**: All CRUD operations validated with real database constraints and user IDs
+- ✅ **Production Testing**: All uncommitted changes tested and confirmed working in Docker environment
 
 ## 🎯 **Business Flow Implementation** ✅
 
@@ -414,6 +419,16 @@ curl -X POST http://localhost:3000/api/analytics/events \   # Test public endpoi
 ```
 
 ### Generate Test JWT Token
+
+#### 🚨 **CRITICAL: JWT Requirements for Docker Testing** 
+The JWT token MUST include ALL required claims that the middleware expects:
+
+- ✅ **Secret**: Use `production-jwt-secret-change-this` for Docker containers
+- ✅ **Issuer**: Must be `campfire-ads` 
+- ✅ **Audience**: Must be `campfire-ads-api`
+- ✅ **User Claims**: `id`, `email`, `role` (`podcaster` | `advertiser` | `admin`)
+
+#### Development (Local Services)
 ```bash
 cd api-gateway
 node -e "
@@ -421,11 +436,228 @@ const jwt = require('jsonwebtoken');
 const token = jwt.sign(
   { id: 'test-user', email: 'test@example.com', role: 'podcaster' },
   'development-jwt-secret-key',
-  { expiresIn: '1h' }
+  { expiresIn: '1h', issuer: 'campfire-ads', audience: 'campfire-ads-api' }
 );
 console.log('Bearer ' + token);
 "
 ```
+
+#### Docker Testing (Production Containers)
+```bash
+cd api-gateway
+# Advertiser token for testing campaigns/creatives
+node -e "
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { id: 'f7e8d9c0-1234-5678-9abc-def012345678', email: 'advertiser@example.com', role: 'advertiser' },
+  'production-jwt-secret-change-this',
+  { expiresIn: '1h', issuer: 'campfire-ads', audience: 'campfire-ads-api' }
+);
+console.log(token);
+"
+
+# Podcaster token for testing podcasts/episodes/slots  
+node -e "
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { id: '123e4567-e89b-12d3-a456-426614174000', email: 'test@example.com', role: 'podcaster' },
+  'production-jwt-secret-change-this',
+  { expiresIn: '1h', issuer: 'campfire-ads', audience: 'campfire-ads-api' }
+);
+console.log(token);
+"
+```
+
+#### ⚠️ Common JWT Errors:
+- ❌ **"Malformed token"**: Missing `issuer` or `audience` claims
+- ❌ **"Authentication required"**: Missing `Authorization: Bearer ` header
+- ❌ **"Invalid token"**: Wrong secret (dev vs production)
+- ❌ **"Token expired"**: Generate new token (1h expiry)
+
+### 🧪 **CRUD Testing Commands (Docker)**
+
+**First generate tokens using the Docker JWT commands above, then:**
+
+#### Campaigns CRUD Testing
+```bash
+# Set your advertiser JWT token
+JWT_TOKEN="eyJhbGc..."  # Use advertiser token from above
+
+# Test GET campaigns (requires pagination params)
+curl -X GET "http://localhost:3004/campaigns?page=1&limit=10&sort=desc&sortBy=created_at" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Test POST campaign (create)
+curl -X POST "http://localhost:3004/campaigns" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test Campaign", 
+    "budget_cents": 100000, 
+    "max_bid_cents": 250, 
+    "start_date": "2025-01-01", 
+    "end_date": "2025-12-31", 
+    "targeting": {}, 
+    "bid_strategy": "cpm"
+  }'
+
+# Test PUT campaign (update) - use campaign ID from POST response
+curl -X PUT "http://localhost:3004/campaigns/{CAMPAIGN_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Updated Campaign Name"}'
+
+# Test DELETE campaign  
+curl -X DELETE "http://localhost:3004/campaigns/{CAMPAIGN_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### Creatives CRUD Testing  
+```bash
+# Test GET creatives (paginated)
+curl -X GET "http://localhost:3004/creatives?page=1&limit=10&sort=desc&sortBy=created_at" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Test POST creative (upload) - requires multipart/form-data
+curl -X POST "http://localhost:3004/creatives" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -F "file=@test-audio.mp3" \
+  -F "name=Test Creative" \
+  -F "creative_type=audio" \
+  -F "duration=30"
+
+# Test GET creative by ID
+curl -X GET "http://localhost:3004/creatives/{CREATIVE_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Test creative download
+curl -X GET "http://localhost:3004/creatives/{CREATIVE_ID}/download" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  --output downloaded-creative.mp3
+
+# Test PUT creative (update metadata)
+curl -X PUT "http://localhost:3004/creatives/{CREATIVE_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Creative Name",
+    "audio_bitrate_kbps": 128,
+    "lufs_integrated": -16.0,
+    "status": "approved"
+  }'
+
+# Test DELETE creative
+curl -X DELETE "http://localhost:3004/creatives/{CREATIVE_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### Campaign-Creative Associations CRUD
+```bash
+# Test POST campaign-creative assignment (enhanced with metadata)
+curl -X POST "http://localhost:3004/campaigns/{CAMPAIGN_ID}/creatives" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "creative_ids": ["creative-uuid-1", "creative-uuid-2"],
+    "weight": 100,
+    "flight_start": "2025-01-01T00:00:00Z",
+    "flight_end": "2025-12-31T23:59:59Z", 
+    "position": "pre_roll",
+    "frequency_cap_per_episode": 1,
+    "notes": "Primary creative for Q1 campaign"
+  }'
+
+# Test GET campaign creatives
+curl -X GET "http://localhost:3004/campaigns/{CAMPAIGN_ID}/creatives" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Test PUT campaign-creative association update (NEW ENDPOINT)
+curl -X PUT "http://localhost:3004/campaigns/{CAMPAIGN_ID}/creatives/{CREATIVE_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "weight": 150,
+    "position": "mid_roll",
+    "notes": "Updated to mid-roll placement"
+  }'
+
+# Test DELETE campaign-creative detachment
+curl -X DELETE "http://localhost:3004/campaigns/{CAMPAIGN_ID}/creatives/{CREATIVE_ID}" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+#### Direct Service vs API Gateway Testing
+```bash
+# Direct to inventory service (port 3004)
+curl -X GET "http://localhost:3004/campaigns?page=1&limit=10&sort=desc&sortBy=created_at" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Through API Gateway (port 3000) 
+curl -X GET "http://localhost:3000/api/campaigns?page=1&limit=10&sort=desc&sortBy=created_at" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### 🗄️ **Database Testing & Real User IDs**
+
+#### Check Real User IDs in Database
+```bash
+# Check existing advertiser IDs for JWT generation
+docker exec campfire-ads-postgres-1 psql -U campfire_user -d campfire_ads \
+  -c "SELECT id, email, role FROM users WHERE role = 'advertiser' LIMIT 3;"
+
+# Check existing podcaster IDs  
+docker exec campfire-ads-postgres-1 psql -U campfire_user -d campfire_ads \
+  -c "SELECT id, email, role FROM users WHERE role = 'podcaster' LIMIT 3;"
+```
+
+#### Generate JWT with Real Database User IDs
+```bash
+cd api-gateway
+
+# Real advertiser from database (for campaigns/creatives testing)
+node -e "
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { id: '550e8400-e29b-41d4-a716-446655440001', email: 'advertiser@example.com', role: 'advertiser' },
+  'production-jwt-secret-change-this',
+  { expiresIn: '1h', issuer: 'campfire-ads', audience: 'campfire-ads-api' }
+);
+console.log(token);
+"
+
+# Real podcaster from database (for podcasts/episodes/slots testing)
+node -e "
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { id: '123e4567-e89b-12d3-a456-426614174000', email: 'test@example.com', role: 'podcaster' },
+  'production-jwt-secret-change-this',
+  { expiresIn: '1h', issuer: 'campfire-ads', audience: 'campfire-ads-api' }
+);
+console.log(token);
+"
+```
+
+#### Database Schema Validation  
+```bash
+# Check new migration fields are working
+docker exec campfire-ads-postgres-1 psql -U campfire_user -d campfire_ads \
+  -c "SELECT status, lufs_integrated, cdn_url, version FROM creatives LIMIT 3;"
+
+# Check campaign-creative associations metadata
+docker exec campfire-ads-postgres-1 psql -U campfire_user -d campfire_ads \
+  -c "SELECT weight, position, frequency_cap_per_episode, notes FROM campaign_creatives LIMIT 3;"
+```
+
+### 🧪 **Validated Test Results (Aug 2025)**
+
+**✅ All CRUD operations tested and working:**
+- **Campaigns**: GET (pagination), POST, PUT, DELETE - all working
+- **Creatives**: GET, POST (file upload), PUT (metadata), DELETE, download - all working  
+- **Campaign-Creative Associations**: POST (with metadata), GET, PUT (NEW), DELETE - all working
+- **API Gateway Integration**: All endpoints accessible through both direct (3004) and gateway (3000)
+- **Database Migration**: All new fields working (status, lufs_integrated, cdn_url, version)
+- **JWT Authentication**: Working with proper issuer/audience claims
+- **Real Database**: Foreign key constraints enforced, real user IDs required
 
 ### 🛡️ Security Testing & Validation
 
@@ -640,9 +872,9 @@ cd common/middleware && npm test
 
 ## 🚀 Phase 2A.5++ Complete - RTB Reservation System Production Ready ✅
 
-**COMPLETED**: RTB slot reservation system fully tested and production ready
-**CURRENT**: Secure two-sided marketplace with verified RTB foundation  
-**NEXT**: Campaign creative management → Phase 2B - RTB Engine
+**COMPLETED**: Creative management system with enhanced metadata and database migration
+**CURRENT**: Production-ready two-sided marketplace with complete CRUD operations
+**NEXT**: Phase 2B - Tracking Service for impression tracking and billing automation
 **Architecture**: See [`stack.md`](./stack.md) for complete microservices roadmap
 
 ### ✅ **Major Milestones Achieved:**
