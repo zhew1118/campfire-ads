@@ -5,7 +5,8 @@ export class ServiceDiscovery {
       analytics: process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3002',
       audio: process.env.AUDIO_SERVICE_URL || 'http://localhost:8081',
       rss: process.env.RSS_SERVICE_URL || 'http://localhost:3003',
-      rtb: process.env.RTB_ENGINE_URL || 'http://localhost:8080'
+      rtb: process.env.RTB_ENGINE_URL || 'http://localhost:8080',
+      tracking: process.env.TRACKING_SERVICE_URL || 'http://localhost:3006'
     };
     
     return services[serviceName as keyof typeof services] || '';

@@ -30,6 +30,7 @@ import analyticsRouter from './routes/analytics';
 import audioRouter from './routes/audio';
 import rssRouter from './routes/rss';
 import reservationsRouter from './routes/reservations';
+import trackingRouter from './routes/tracking';
 
 dotenv.config();
 
@@ -114,6 +115,9 @@ app.get('/health', (req, res) => {
     }
   });
 });
+
+// Impression tracking endpoints must come before /api routes for proper routing
+app.use('/', trackingRouter);
 
 // Authentication routes (public endpoints for login)
 app.use('/api/auth', authRouter);

@@ -21,6 +21,7 @@ services:
       - DB_PASSWORD=campfire_password
       - DB_SSL=false
       - INVENTORY_SERVICE_URL=http://inventory-service:3004
+      - TRACKING_SERVICE_URL=http://tracking-service:3006
       - ANALYTICS_SERVICE_URL=http://mock-services:3002
       - AUDIO_SERVICE_URL=http://mock-services:8081
       - RSS_SERVICE_URL=http://mock-services:3003
@@ -28,6 +29,7 @@ services:
     depends_on:
       - redis
       - inventory-service
+      - tracking-service
       - mock-services
     networks:
       - campfire-network
@@ -93,6 +95,33 @@ services:
       - DB_SSL=false
       - JWT_SECRET=production-jwt-secret-change-this
       - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - campfire-network
+    restart: unless-stopped
+
+  # Tracking Service (Node.js + PostgreSQL)
+  tracking-service:
+    build:
+      context: .
+      dockerfile: ./services/tracking-service/Dockerfile
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=production
+      - PORT=3006
+      - DATABASE_URL=postgresql://campfire_user:campfire_password@postgres:5432/campfire_ads
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=campfire_ads
+      - DB_USER=campfire_user
+      - DB_PASSWORD=campfire_password
+      - DB_SSL=false
+      - JWT_SECRET=production-jwt-secret-change-this
+      - REDIS_URL=redis://redis:6379
+      - TRACKING_BASE_URL=http://localhost:3006
     depends_on:
       - postgres
       - redis

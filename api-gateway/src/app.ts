@@ -18,6 +18,7 @@ import episodesRouter from './routes/episodes';
 import slotsRouter from './routes/slots';
 import adsRouter from './routes/ads';
 import analyticsRouter from './routes/analytics';
+import trackingRouter from './routes/tracking';
 import audioRouter from './routes/audio';
 import rssRouter from './routes/rss';
 
@@ -68,6 +69,7 @@ app.use('/api/episodes', authMiddleware.validateJWT, episodesRouter);
 app.use('/api/slots', authMiddleware.validateJWT, slotsRouter);
 app.use('/api/ads', adsRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/tracking', trackingRouter);
 app.use('/api/audio', authMiddleware.validateJWT, audioRouter);
 app.use('/api/rss', rssRouter);
 
